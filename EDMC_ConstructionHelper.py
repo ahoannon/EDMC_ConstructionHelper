@@ -1,12 +1,15 @@
 """
 EDMC Construction Helper class
 """
+import tkinter as tk
 
 class ConstructionHelper():
     def __init__(self, plugin_dir):
 
         self.SiteNames = {}
         self.GoodsRequired = {}
+        self.goods_string = tk.StringVar()
+        self.values_string = tk.StringVar()
 
     def UpdateStations(self,entry):
         if (('MarketID' in entry) and
@@ -16,7 +19,6 @@ class ConstructionHelper():
             else:
                 StationName = entry['StationName']
             self.SiteNames[entry['MarketID']] = [StationName,entry['StarSystem']]
-        
         
     def UpdateGoods(self,entry):
         if (entry['ConstructionComplete'] == False and
@@ -38,6 +40,62 @@ class ConstructionHelper():
                     print("\n MarketID",entry['MarketID'],"not in list of table names")
                     return
                 print("\nConstruction resources required for Market:",self.SiteNames[entry['MarketID']])
+                goods=""
+                values=""
                 for resource in current:
                     print(resource,':',current[resource]);
+                    goods += resource+":\n"
+                    values += str(current[resource])+"\n"
+                self.goods_string.set(goods[:-1])
+                self.values_string.set(values[:-1])
+
+                
+    def open_overlay(self):
+        self.gui_overlay = tk.Toplevel()
+        self.gui_overlay.config(bg="black")
+        self.gui_overlay.overrideredirect(True)
+        self.gui_overlay.attributes("-topmost", 1)
+        self.gui_overlay_goods = tk.Label(self.gui_overlay, textvariable=self.goods_string,
+                                          justify=tk.RIGHT,fg="white",bg="black")
+        self.gui_overlay_values = tk.Label(self.gui_overlay, textvariable=self.values_string,
+                                           justify=tk.LEFT,fg="white",bg="black")
+        self.gui_overlay_goods.grid(column=0,row=0,sticky=(tk.E))
+        self.gui_overlay_values.grid(column=1,row=0,sticky=(tk.W))
+        #wait for the window before setting transparency
+        self.gui_overlay.wait_visibility(self.gui_overlay)
+        if '-transparentcolor' in self.gui_overlay.attributes():
+            self.gui_overlay.attributes('-transparentcolor',"black")
+        self.gui_overlay.attributes("-alpha", 0.7)
+        #change buttons on main window
+        self.gui_button_open.grid_remove()
+        self.gui_button_close.grid(column=0,row=2,columnspan=2,sticky=(tk.N))
+
+    def close_overlay(self):
+        self.gui_overlay.destroy()
+        self.gui_button_open.grid(column=0,row=2,columnspan=2,sticky=(tk.N))
+        self.gui_button_close.grid_remove()
+ 
+    def init_gui(self,parent):
+        self.parent = parent
+        self.gui_frame = tk.Frame(parent, borderwidth=0)
+        self.gui_frame.grid()
+
+        self.goods_string.set("Empty:")
+        self.values_string.set("0")
+        
+        self.gui_goods = tk.Label(self.gui_frame, textvariable=self.goods_string,
+                                  justify=tk.RIGHT)
+        self.gui_values = tk.Label(self.gui_frame, textvariable=self.values_string,
+                                   justify=tk.LEFT)
+        self.gui_goods.grid(column=0,row=1,sticky=(tk.E))
+        self.gui_values.grid(column=1,row=1,sticky=(tk.W))
+
+        self.gui_button_open = tk.Button(self.gui_frame,text="Open overlay",
+                                          command=self.open_overlay)
+        self.gui_button_open.grid(column=0,row=2,columnspan=2,sticky=(tk.N))
+        self.gui_button_close = tk.Button(self.gui_frame,text="Close overlay",
+                                          command=self.close_overlay)
+        self.gui_button_close.grid_remove()
+        
+        return self.gui_frame
 

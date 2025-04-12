@@ -25,3 +25,7 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         ConstHelper.UpdateStations(entry);
 
         
+def plugin_app(parent):
+    global ConstHelper;
+    return ConstHelper.init_gui(parent)
+    
