@@ -2,10 +2,24 @@
 EDMC Construction Helper class
 """
 import tkinter as tk
+from tkinter import ttk
 
 class ConstructionHelper():
     def __init__(self, plugin_dir):
 
+        # -------- Configuration (may get a gui) --------
+        # display the goods sorted by category or unsorted (= usually alphabetic)
+        self.config_sorted = False #not implemented yet
+        #position of the overlay window on the screen
+        self.config_overlayX = 0 #pixels right from top left corner
+        self.config_overlayY = 0 #pixels down from top left corner
+        #transparency of the overlay window (0.0=invisible, 1.0=intransparent)
+        #doesn't work reliably
+        self.config_Alpha = 0.7
+        #Windows-only: make overlay background fully transparent
+        self.config_BGtrans = False
+
+        # -------- Internal data structures --------
         self.SiteNames = {}
         self.GoodsRequired = {}
         self.goods_string = tk.StringVar()
@@ -54,6 +68,7 @@ class ConstructionHelper():
         self.gui_overlay = tk.Toplevel()
         self.gui_overlay.config(bg="black")
         self.gui_overlay.overrideredirect(True)
+        self.gui_overlay.geometry("+%d+%d"%(self.config_overlayX,self.config_overlayY))
         self.gui_overlay.attributes("-topmost", 1)
         self.gui_overlay_goods = tk.Label(self.gui_overlay, textvariable=self.goods_string,
                                           justify=tk.RIGHT,fg="white",bg="black")
@@ -63,9 +78,9 @@ class ConstructionHelper():
         self.gui_overlay_values.grid(column=1,row=0,sticky=(tk.W))
         #wait for the window before setting transparency
         self.gui_overlay.wait_visibility(self.gui_overlay)
-        if '-transparentcolor' in self.gui_overlay.attributes():
+        if '-transparentcolor' in self.gui_overlay.attributes() and self.config_BGtrans:
             self.gui_overlay.attributes('-transparentcolor',"black")
-        self.gui_overlay.attributes("-alpha", 0.7)
+        self.gui_overlay.attributes("-alpha", self.config_Alpha)
         #change buttons on main window
         self.gui_button_open.grid_remove()
         self.gui_button_close.grid(column=0,row=2,columnspan=2,sticky=(tk.N))
