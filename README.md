@@ -27,7 +27,8 @@ up with something short and useful) is added to the listbox and the needed goods
 If you have visited more than one construction site then you can select multiple sites in the listbox. If you do that then the list of needed goods will be 
 the sum of the goods needed for all selected sites.
 
-If you select no site then the list of needed goods will be empty.
+If you select no site then the list of needed goods will be empty.\
+If you visit a new construction site then the selection will be reset to only this new site as mentioned earlier.
 
 ### Overlay Window
 
