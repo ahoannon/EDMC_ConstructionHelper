@@ -5,7 +5,7 @@ colonization construction projects.
 
 ## Installation
 
-Download the `.zip` file an unpack it into the `plugins/` directory of **EDMC**. Which is shown in the `Plugins` tab of the `Settings` window of **EDMC**
+Download the `.zip` file an unpack it into the `plugins/` directory of **EDMC**, which is shown in the `Plugins` tab of the `Settings` window of **EDMC**
 
 See also the relevant page on the [EDMC Wiki](https://github.com/EDCD/EDMarketConnector/wiki/Plugins)
 
@@ -41,12 +41,12 @@ small, easy to miss dark rectangle in the corner of your screen. (And that's onl
 
 ### Customization
 
-Until I get around to writing a preferences gui you can customize things like the position of the overlay window in there by 
+Until I get around to writing a preferences gui you can customize things like the position of the overlay window, the font size and color in there, etc. by 
 opening the file `EDMC_ConstructionHelper.py` and changing the values for the settings in the upper part of the file.
 
 ## Technical Stuff
 
-This plugin is based on the `ColonisationConstructionDepot` logfile event that **FDev** introduced with the "Corsair" update on Tuesday April 8 2025.
+This plugin is based on the `ColonisationConstructionDepot` logfile event that **FDev** introduced with the "Corsair" update on Tuesday April 8th 2025.
 It identifies construction sites by the fact that it sees such an event from there and then tries to come up with a suitable name for the station with the same 
 MarketID. 
 
