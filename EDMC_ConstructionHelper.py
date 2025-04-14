@@ -15,7 +15,8 @@ class ConstructionHelper():
         self.config_overlayY = 0 #pixels down from top left corner
         #foregroung and background color of the overlay
         # needs to be a color understood by TK
-        self.config_overlayFG = "white"
+        # ED orange is: "#ffc404"; ED blue is "#08fcfc"
+        self.config_overlayFG = "#ffffff"
         self.config_overlayBG = "black"
         # Font size for the overlay, 0 == use default
         self.config_fontSize = 0
