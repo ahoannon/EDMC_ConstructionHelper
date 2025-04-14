@@ -18,7 +18,7 @@ class ConstructionHelper():
         self.config_overlayFG = "white"
         self.config_overlayBG = "black"
         # Font size for the overlay, 0 == use default
-        self.config_fontSize = 20
+        self.config_fontSize = 0
         #transparency of the overlay window (0.0=invisible, 1.0=intransparent)
         # doesn't work reliably on Linux
         self.config_Alpha = 0.7
