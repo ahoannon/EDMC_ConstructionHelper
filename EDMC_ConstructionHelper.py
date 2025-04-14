@@ -13,8 +13,14 @@ class ConstructionHelper():
         #position of the overlay window on the screen
         self.config_overlayX = 0 #pixels right from top left corner
         self.config_overlayY = 0 #pixels down from top left corner
+        #foregroung and background color of the overlay
+        # needs to be a color understood by TK
+        self.config_overlayFG = "white"
+        self.config_overlayBG = "black"
+        # Font size for the overlay, 0 == use default
+        self.config_fontSize = 20
         #transparency of the overlay window (0.0=invisible, 1.0=intransparent)
-        #doesn't work reliably
+        # doesn't work reliably on Linux
         self.config_Alpha = 0.7
         #Windows-only: make overlay background fully transparent
         self.config_BGtrans = False
@@ -71,9 +77,17 @@ class ConstructionHelper():
         self.gui_overlay.geometry("+%d+%d"%(self.config_overlayX,self.config_overlayY))
         self.gui_overlay.attributes("-topmost", 1)
         self.gui_overlay_goods = tk.Label(self.gui_overlay, textvariable=self.goods_string,
-                                          justify=tk.RIGHT,fg="white",bg="black")
+                                          justify=tk.RIGHT,
+                                          fg=self.config_overlayFG,
+                                          bg=self.config_overlayBG)
         self.gui_overlay_values = tk.Label(self.gui_overlay, textvariable=self.values_string,
-                                           justify=tk.LEFT,fg="white",bg="black")
+                                           justify=tk.LEFT,
+                                           fg=self.config_overlayFG,
+                                           bg=self.config_overlayBG)
+        if self.config_fontSize:
+            fontObj = tk.font.Font(size=self.config_fontSize)
+            self.gui_overlay_goods.config(font=fontObj)
+            self.gui_overlay_values.config(font=fontObj)            
         self.gui_overlay_goods.grid(column=0,row=0,sticky=(tk.E))
         self.gui_overlay_values.grid(column=1,row=0,sticky=(tk.W))
         #wait for the window before setting transparency
