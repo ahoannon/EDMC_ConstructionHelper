@@ -93,7 +93,7 @@ class ConstructionHelper():
         #wait for the window before setting transparency
         self.gui_overlay.wait_visibility(self.gui_overlay)
         if '-transparentcolor' in self.gui_overlay.attributes() and self.config_BGtrans:
-            self.gui_overlay.attributes('-transparentcolor',"black")
+            self.gui_overlay.attributes('-transparentcolor',self.config_overlayBG)
         self.gui_overlay.attributes("-alpha", self.config_Alpha)
         #change buttons on main window
         self.gui_button_open.grid_remove()
