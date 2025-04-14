@@ -20,7 +20,7 @@ def plugin_stop():
 def journal_entry(cmdr, is_beta, system, station, entry, state):
     global ConstHelper;
     if (entry['event'] == 'ColonisationConstructionDepot'):
-        ConstHelper.UpdateGoods(entry);
+        ConstHelper.UpdateGoods(entry,System=system,StationName=station);
     if ((entry['event'] == 'Location') or (entry['event'] == 'Docked')):
         ConstHelper.UpdateStations(entry);
 
