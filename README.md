@@ -36,7 +36,7 @@ The overlay button will open (or close) an overlay window that contains the same
 tries to stay above all other windows. If it will be visible for you will depend on your setup. It does work for me on my Linux system and it seems to work 
 on a typical windows system if **ED** is not running in fullscreen mode but e.g. in borderless mode. By default the overlay window will be in the top left corner 
 of your (primary) screen.\
-Note: if you can't see the overlay window check if there is a list of goods displayed in the main **EDMC** window. If there isn't then the overlay window is a 
+Note: if you can't see the overlay window, check if there is a list of goods displayed in the main **EDMC** window. If there isn't then the overlay window is a 
 small, easy to miss dark rectangle in the corner of your screen. (And that's only if it isn't fully transparent.)
 
 ### Customization
