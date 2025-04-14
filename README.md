@@ -21,7 +21,13 @@ listbox and the overlay window button will contain a list of all the goods that 
 
 ### Multiple Construction Sites
 
-TBW
+Once you have docked at a construction site that you haven't visited previously (in this session of EDMC) a name for this site (the plugin will try to come 
+up with something short and useful) is added to the listbox and the needed goods will be displayed by selecting that new entry in the listbox.
+
+If you have visited more than one construction site then you can select multiple sites in the listbox. If you do that then the list of needed goods will be 
+the sum of the goods needed for all selected sites.
+
+If you select no site then the list of needed goods will be empty.
 
 ### Overlay Window
 
@@ -37,11 +43,18 @@ small, easy to miss dark rectangle in the corner of your screen. (And that's onl
 Until I get around to writing a preferences gui you can customize things like the position of the overlay window in there by 
 opening the file `EDMC_ConstructionHelper.py` and changing the values for the settings in the upper part of the file.
 
+## Technical Stuff
+
+This plugin is based on the `ColonisationConstructionDepot` logfile event that **FDev** introduced with the "Corsair" update on Tuesday April 8 2025.
+It identifies construction sites by the fact that it sees such an event from there and then tries to come up with a suitable name for the station with the same 
+MarketID. 
+
 ## ToDo 
 
 - find and fix bugs
 - preferences gui
 - remove finished construction sites
 - display current ship cargo
+- sort goods by category
 - option to use the [EDMC Overlay](https://github.com/inorton/EDMCOverlay) plugin instead of the TK window
 - remember construction sites between **EDMC** sessions
