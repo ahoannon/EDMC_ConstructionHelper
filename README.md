@@ -12,3 +12,5 @@ See also the relevant page on the [EDMC Wiki](https://github.com/EDCD/EDMarketCo
 ## Usage
  
 When `EDMC` is started with the ConstructionHelper running, then there will be a listbox with a list of names of visited construction sites (or a note that you haven't visited a construction site yet) on the main `EDMC` window. 
+
+![Screenshot of empty EDMC main window](doc/EDMC_Main.png)
