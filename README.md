@@ -11,6 +11,37 @@ See also the relevant page on the [EDMC Wiki](https://github.com/EDCD/EDMarketCo
 
 ## Usage
  
-When `EDMC` is started with the ConstructionHelper running, then there will be a listbox with a list of names of visited construction sites (or a note that you haven't visited a construction site yet) on the main `EDMC` window. 
+When `EDMC` is started with the ConstructionHelper running, then there will be a space on the main `EDMC` window with a listbox on top and a button 
+to open or close the overlay window on the bottom. 
 
 ![Screenshot of empty EDMC main window](doc/EDMC_Main.png)
+
+Once you docked at one or more active construction sites then the listbox will contain names of all known construction sites and the space between the 
+listbox and the overlay window button will contain a list of all the goods that you need to finish the selected construction site(s).
+
+### Overlay Window
+
+The overlay button will open (or close) an overlay window that contains the same list of needed goods as the main window. It is a simple borderless window that
+tries to stay above all other windows. If it will be visible for you will depend on your setup. It does work for me on my Linux system and it seems to work 
+on a typical windows system if ED is not running in fullscreen mode but e.g. in borderless mode. By default the overlay window will be in the top left corner 
+of your (primary) screen.\
+Note: if you can't see the overlay window check if there is a list of goods displayed in the main EDMC window. If there isn't then the overlay window is a 
+small, easy to miss dark rectangle in the corner of your screen. (And that's only if it isn't fully transparent.)
+
+### Multiple Construction Sites
+
+TBW
+
+### Customization
+
+Until I get around to writing a preferences gui you can customize things like the position of the overlay window in there by 
+opening the file `EDMC_ConstructionHelper.py` and changing the values for the settings in the upper part of the file.
+
+## ToDo 
+
+- find and fix bugs
+- preferences gui
+- remove finished construction sites
+- display current ship cargo
+- option to use the `EDMC Overlay` plugin instead of the TK window
+- remember construction sites between EDMC sessions
