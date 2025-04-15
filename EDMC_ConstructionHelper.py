@@ -58,7 +58,7 @@ class ConstructionHelper():
         if ((entry['MarketID'] not in self.SiteNames) or
             ('StationType' not in self.SiteNames[entry['MarketID']])):
             update_list = False
-            if ('StationType' not in self.SiteNames[entry['MarketID']]):
+            if (entry['MarketID'] in self.SiteNames):
                 update_list = True
             self.SiteNames[entry['MarketID']] = {};
             self.SiteNames[entry['MarketID']]['StationName']=entry['StationName']
@@ -78,9 +78,9 @@ class ConstructionHelper():
             (self.SiteNames[MarketID]['StationName'] == '$EXT_PANEL_ColonisationShip:#index=1;')):
             Name = self.SiteNames[MarketID]['System']+": Primary Port"
         elif (self.SiteNames[MarketID]['StationType'] == 'SpaceConstructionDepot'):
-            Name = self.SiteNames[MarketID]['System']+": Orbital Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
+            Name = self.SiteNames[MarketID]['System']+": Orbit Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
         elif (self.SiteNames[MarketID]['StationType'] == 'PlanetaryConstructionDepot'):
-            Name = self.SiteNames[MarketID]['System']+": Planetary Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
+            Name = self.SiteNames[MarketID]['System']+": Planet Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
         else:
             Name = self.SiteNames[MarketID]['System']+": "+self.SiteNames[MarketID]['StationName']
         return Name
@@ -153,7 +153,7 @@ class ConstructionHelper():
     def init_gui(self,parent):
         self.parent = parent
         self.gui_frame = tk.Frame(parent, borderwidth=0)
-        self.gui_frame.grid(sticky=(tk.E,tk.W))
+        self.gui_frame.grid(sticky=(tk.E,tk.W,tk.N,tk.S))
 
         self.gui_listbox = tk.Listbox(self.gui_frame, listvariable=self.listbox_items,
                                       selectmode=tk.EXTENDED, exportselection=False,
@@ -200,14 +200,14 @@ class ConstructionHelper():
         selectedIDs = []
         for idx in self.gui_listbox.curselection():
             selectedIDs.append(self.listbox_IDs[int(idx)])
-        if len(self.GoodsRequired) != len(self.listbox_IDs):
-            for MarketID in self.GoodsRequired.keys():
-                if MarketID not in self.listbox_IDs:
-                    self.listbox_IDs.append(MarketID)
-                    self.listbox_stations.append(self.SiteNames[MarketID]['Name'])
-            self.listbox_items.set(self.listbox_stations)
-            lbox_height = min(len(self.GoodsRequired),self.config_listboxHeight)
-            self.gui_listbox.config(height=lbox_height)
+        self.listbox_IDs = []
+        self.listbox_stations = []
+        for MarketID in self.GoodsRequired.keys():
+            self.listbox_IDs.append(MarketID)
+            self.listbox_stations.append(self.SiteNames[MarketID]['Name'])
+        self.listbox_items.set(self.listbox_stations)
+        lbox_height = min(len(self.GoodsRequired),self.config_listboxHeight)
+        self.gui_listbox.config(height=lbox_height)
         # clear selection
         self.gui_listbox.selection_clear(0,len(self.listbox_IDs))
         # reset selection
