@@ -54,7 +54,7 @@ MarketID.
 
 - find and fix bugs
 - preferences gui
-- remove finished construction sites
+- remove construction sites finished by someone else
 - display current ship cargo
 - sort goods by category
 - option to use the [EDMC Overlay](https://github.com/inorton/EDMCOverlay) plugin instead of the TK window
