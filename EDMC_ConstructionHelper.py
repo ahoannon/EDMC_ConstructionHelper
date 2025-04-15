@@ -39,8 +39,8 @@ class ConstructionHelper():
         self.config_BGtrans = False
 
         # maximum height of the site selection listbox
-        self.config_listboxHeight = 5
-        # width on the site selection listbox in characters
+        self.config_listboxHeight = 4
+        # minimum width on the site selection listbox in "characters"
         self.config_listboxWidth = 35
         
         # -------- Internal data structures --------
@@ -78,9 +78,9 @@ class ConstructionHelper():
             (self.SiteNames[MarketID]['StationName'] == '$EXT_PANEL_ColonisationShip:#index=1;')):
             Name = self.SiteNames[MarketID]['System']+": Primary Port"
         elif (self.SiteNames[MarketID]['StationType'] == 'SpaceConstructionDepot'):
-            Name = self.SiteNames[MarketID]['System']+": Orbit Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
+            Name = self.SiteNames[MarketID]['System']+": Orbital Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
         elif (self.SiteNames[MarketID]['StationType'] == 'PlanetaryConstructionDepot'):
-            Name = self.SiteNames[MarketID]['System']+": Planet Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
+            Name = self.SiteNames[MarketID]['System']+": Planetary Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
         else:
             Name = self.SiteNames[MarketID]['System']+": "+self.SiteNames[MarketID]['StationName']
         return Name
@@ -179,6 +179,8 @@ class ConstructionHelper():
         self.gui_button_close = tk.Button(self.gui_frame,text="Close overlay",
                                           command=self.close_overlay)
         self.gui_button_close.grid_remove()
+        self.gui_frame.grid_columnconfigure(0, weight=1)
+        self.gui_frame.grid_columnconfigure(1, weight=1)
 
         self.update_listbox()
         self.update_values()
