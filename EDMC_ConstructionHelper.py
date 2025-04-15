@@ -53,9 +53,13 @@ class ConstructionHelper():
         self.listbox_stations = []
 
     def UpdateStations(self,entry):
-        if (('MarketID' in entry) and
-            ((entry['MarketID'] not in self.SiteNames) or
-             ('StationType' not in self.SiteNames[entry['MarketID']]))):
+        if ('MarketID' not in entry):
+            return
+        if ((entry['MarketID'] not in self.SiteNames) or
+            ('StationType' not in self.SiteNames[entry['MarketID']])):
+            update_list = False
+            if ('StationType' not in self.SiteNames[entry['MarketID']]):
+                update_list = True
             self.SiteNames[entry['MarketID']] = {};
             self.SiteNames[entry['MarketID']]['StationName']=entry['StationName']
             self.SiteNames[entry['MarketID']]['StationType']=entry['StationType']
@@ -64,6 +68,8 @@ class ConstructionHelper():
             if 'StationName_Localised' in entry:
                 self.SiteNames[entry['MarketID']]['StationName_Localised'] = entry['StationName_Localised']
             self.SiteNames[entry['MarketID']]['Name'] = self.GetShortStationName(entry['MarketID'])
+            if update_list:
+                self.update_listbox()
 
     def GetShortStationName(self,MarketID):
         Name = ""
@@ -81,8 +87,7 @@ class ConstructionHelper():
                 
     def UpdateGoods(self,entry,System="",StationName=""):
         if (entry['ConstructionComplete'] == False and
-            entry['ConstructionFailed'] == False
-            ):
+            entry['ConstructionFailed'] == False):
             current = {}
             for resource in entry['ResourcesRequired']:
                 amount = resource['RequiredAmount'] - resource['ProvidedAmount']
@@ -106,6 +111,10 @@ class ConstructionHelper():
                 idx = self.listbox_IDs.index(entry['MarketID'])
                 self.gui_listbox.selection_set(idx)
             self.update_values()
+        else: #Construction is either complete or has failed
+            if entry['MarketID'] in self.GoodsRequired:
+                self.GoodsRequired.pop(entry['MarketID'])
+                self.update_listbox()
                 
     def open_overlay(self):
         self.gui_overlay = tk.Toplevel()
@@ -187,7 +196,10 @@ class ConstructionHelper():
             self.listbox_stations = []
             return
         # we do know about construction projects
-        # update the listbox if needed
+        # rebuild the listbox, remember selection
+        selectedIDs = []
+        for idx in self.gui_listbox.curselection():
+            selectedIDs.append(self.listbox_IDs[int(idx)])
         if len(self.GoodsRequired) != len(self.listbox_IDs):
             for MarketID in self.GoodsRequired.keys():
                 if MarketID not in self.listbox_IDs:
@@ -196,8 +208,15 @@ class ConstructionHelper():
             self.listbox_items.set(self.listbox_stations)
             lbox_height = min(len(self.GoodsRequired),self.config_listboxHeight)
             self.gui_listbox.config(height=lbox_height)
-        if clear:
-            self.gui_listbox.selection_clear(0,len(self.listbox_IDs))
+        # clear selection
+        self.gui_listbox.selection_clear(0,len(self.listbox_IDs))
+        # reset selection
+        if not clear:
+            for MarketID in selectedIDs:
+                # We may have just removed a previously selected entry from the listbox
+                if MarketID in self.listbox_IDs:
+                    idx = self.listbox_IDs.index(MarketID)
+                    self.gui_listbox.selection_set(idx)
 
     def update_values(self,event=None):
         if len(self.listbox_IDs):
