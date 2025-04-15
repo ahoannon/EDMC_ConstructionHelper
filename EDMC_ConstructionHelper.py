@@ -115,7 +115,8 @@ class ConstructionHelper():
             if entry['MarketID'] in self.GoodsRequired:
                 self.GoodsRequired.pop(entry['MarketID'])
                 self.update_listbox()
-                
+                self.update_values()
+
     def open_overlay(self):
         self.gui_overlay = tk.Toplevel()
         self.gui_overlay.config(bg="black")
