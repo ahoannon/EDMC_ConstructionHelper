@@ -50,6 +50,10 @@ This plugin is based on the `ColonisationConstructionDepot` logfile event that *
 It identifies construction sites by the fact that it sees such an event from there and then tries to come up with a suitable name for the station with the same 
 MarketID. 
 
+## Licence 
+
+This software is licensed under the [GNU General Public License v3.0](https://github.com/ahoannon/EDMC_ConstructionHelper/blob/main/LICENSE). 
+
 ## ToDo 
 
 - find and fix bugs
