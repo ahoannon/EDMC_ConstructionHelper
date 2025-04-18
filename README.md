@@ -33,11 +33,11 @@ If you visit a new construction site then the selection will be reset to only th
 ### Overlay Window
 
 The overlay button will open (or close) an overlay window that contains the same list of needed goods as the main window. It is a simple borderless window that
-tries to stay above all other windows. If it will be visible for you will depend on your setup. It does work for me on my Linux system and it seems to work 
-on a typical windows system if **ED** is not running in fullscreen mode but e.g. in borderless mode. By default the overlay window will be in the top left corner 
-of your (primary) screen.\
+tries to stay above all other windows, in particular the **ED** game window. If it will be visible for you will depend on your setup. It does work for me on my 
+Linux system and it seems to work on a typical windows system if **ED** is not running in fullscreen mode but e.g. in borderless mode. 
+By default the overlay window will be in the top left corner of your (primary) screen but that can be changed.\
 Note: if you can't see the overlay window, check if there is a list of goods displayed in the main **EDMC** window. If there isn't then the overlay window is a 
-small, easy to miss dark rectangle in the corner of your screen. (And that's only if it isn't fully transparent.)
+small, easy to miss dark rectangle in the corner of your screen. (And it may be fully transparent, making it impossible to see.)
 
 ### Customization
 
