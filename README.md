@@ -39,6 +39,15 @@ By default the overlay window will be in the top left corner of your (primary) s
 Note: if you can't see the overlay window, check if there is a list of goods displayed in the main **EDMC** window. If there isn't then the overlay window is a 
 small, easy to miss dark rectangle in the corner of your screen. (And it may be fully transparent, making it impossible to see.)
 
+[<picture>
+  <img src="https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Overlay_Linux.png" 
+   alt="Screenshot of the overlay window on my Linux where transparency doesn't work" height="200" />
+</picture>](https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Overlay_Linux.png)
+[<picture>
+  <img src="https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Overlay_Windows.png" 
+   alt="Screenshot of the overlay window on a Windows system with working transparency" height="200" />
+</picture>](https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Overlay_Windows.png)
+
 ### Customization
 
 Until I get around to writing a preferences gui you can customize things like the position of the overlay window, the font size and color in there, etc. by 
