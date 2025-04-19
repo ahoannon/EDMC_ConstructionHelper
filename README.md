@@ -70,6 +70,7 @@ This software is licensed under the [GNU General Public License v3.0](https://gi
 - remove construction sites finished by someone else
 - display current ship cargo
 - sort goods by category
+- double click action: remove / rename
 - option to use the [EDMC Overlay](https://github.com/inorton/EDMCOverlay) plugin instead of the TK window
 - remember construction sites between **EDMC** sessions
 - allow user to change site names
