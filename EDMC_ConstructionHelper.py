@@ -105,7 +105,7 @@ class ConstructionHelper():
                     self.SiteNames[entry['MarketID']]['StationName'] = StationName
                     self.SiteNames[entry['MarketID']]['System'] = System
                     self.SiteNames[entry['MarketID']]['Name'] = StationName
-                print("\nUpdated  resources required for Market:",self.SiteNames[entry['MarketID']]['Name'])
+                #print("\nUpdated  resources required for Market:",self.SiteNames[entry['MarketID']]['Name'])
             if entry['MarketID'] not in self.listbox_IDs:
                 self.update_listbox(clear=True)
                 idx = self.listbox_IDs.index(entry['MarketID'])
@@ -241,3 +241,5 @@ class ConstructionHelper():
                 values += str(current[resource])+"\n"
             self.goods_string.set(goods[:-1])
             self.values_string.set(values[:-1])
+
+            
