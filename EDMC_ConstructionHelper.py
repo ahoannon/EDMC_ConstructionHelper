@@ -42,6 +42,10 @@ class ConstructionHelper():
         self.config_listboxHeight = 4
         # minimum width on the site selection listbox in "characters"
         self.config_listboxWidth = 35
+        # option to set the BG color of the listbox
+        #  until I figure out how to use the EMDC UI theme
+        #  set this to 'grey4' to use the dark-theme background color
+        self.config_listboxBG = False
         
         # -------- Internal data structures --------
         self.SiteNames = {}
@@ -160,6 +164,8 @@ class ConstructionHelper():
                                       selectmode=tk.EXTENDED, exportselection=False,
                                       height=1, width=self.config_listboxWidth);
         self.gui_listbox.bind("<<ListboxSelect>>",self.update_values)
+        if self.config_listboxBG:
+            self.gui_listbox.configure(background=self.config_listboxBG)
         self.gui_scrollbar = tk.Scrollbar(self.gui_frame, orient=tk.VERTICAL,
                                           command=self.gui_listbox.yview)
         self.gui_listbox.configure(yscrollcommand=self.gui_scrollbar.set)
