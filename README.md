@@ -63,6 +63,8 @@ MarketID.
 
 This software is licensed under the [GNU General Public License v3.0](https://github.com/ahoannon/EDMC_ConstructionHelper/blob/main/LICENSE). 
 
+Greetings, CMDR Hans Wijn
+
 ## ToDo 
 
 - find and fix bugs
