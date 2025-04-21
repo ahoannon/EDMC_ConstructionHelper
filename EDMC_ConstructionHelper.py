@@ -44,7 +44,7 @@ class ConstructionHelper():
         self.config_listboxWidth = 35
         # option to set the BG color of the listbox
         #  until I figure out how to use the EMDC UI theme
-        #  set this to 'grey4' to use the dark-theme background color
+        #  uncomment the line with 'grey4' to use the dark-theme background color
         self.config_listboxBG = False
         # self.config_listboxBG = 'grey4'
         
