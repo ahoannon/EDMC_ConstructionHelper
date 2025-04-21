@@ -46,6 +46,7 @@ class ConstructionHelper():
         #  until I figure out how to use the EMDC UI theme
         #  set this to 'grey4' to use the dark-theme background color
         self.config_listboxBG = False
+        # self.config_listboxBG = 'grey4'
         
         # -------- Internal data structures --------
         self.SiteNames = {}
