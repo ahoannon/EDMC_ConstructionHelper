@@ -208,7 +208,8 @@ class ConstructionHelper():
         # rebuild the listbox, remember selection
         selectedIDs = []
         for idx in self.gui_listbox.curselection():
-            selectedIDs.append(self.listbox_IDs[int(idx)])
+            if int(idx) < len(self.listbox_IDs):
+                selectedIDs.append(self.listbox_IDs[int(idx)])
         self.listbox_IDs = []
         self.listbox_stations = []
         for MarketID in self.GoodsRequired.keys():
