@@ -45,8 +45,7 @@ class ConstructionHelper():
         # option to set the BG color of the listbox
         #  until I figure out how to use the EMDC UI theme
         #  uncomment the line with 'grey4' to use the dark-theme background color
-        self.config_listboxBG = False
-        # self.config_listboxBG = 'grey4'
+        self.config_listboxBG = 'grey4'
         
         # -------- Internal data structures --------
         self.SiteNames = {}
