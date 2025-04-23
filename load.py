@@ -15,6 +15,8 @@ def plugin_start3(plugin_dir):
     return 'ConstructionHelper';
 
 def plugin_stop():
+    global ConstHelper;
+    ConstHelper = None
     return None;
 
 def journal_entry(cmdr, is_beta, system, station, entry, state):
