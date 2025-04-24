@@ -6,14 +6,18 @@ from tkinter import ttk
 # ---- EDMC logger setup ----
 import logging
 import os
-from config import appname
+try:
+    from config import appname
+    
+    plugin_name = os.path.basename(os.path.dirname(__file__))
+    logger = logging.getLogger(f'{appname}.{plugin_name}')
+    # The logger should have been set up by the EDMC core
+    if not logger.hasHandlers():
+        print("I thought this wouldn't happen again in current version of EDMC!")
+except ModuleNotFoundError:
+    # We are not running from EDMC
+    logger = logging.getLogger(__name__)
 
-plugin_name = os.path.basename(os.path.dirname(__file__))
-logger = logging.getLogger(f'{appname}.{plugin_name}')
-
-# The logger should have been set up by the EDMC core
-if not logger.hasHandlers():
-    print("I thought this wouldn't happen again in current version of EDMC!")
 # ---- EDMC logger setup end ----
    
 class ConstructionHelper():
