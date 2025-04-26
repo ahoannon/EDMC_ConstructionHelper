@@ -74,6 +74,7 @@ def send_events():
 
 
 root = tk.Tk()
+root.title("Construction Helper")
 gui_L1 = tk.Label(root,text="Path to journal files:")
 gui_dirvar = tk.StringVar()
 gui_dirvar.set(journal_directory)
