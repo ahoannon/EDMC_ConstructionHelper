@@ -44,8 +44,6 @@ def find_journal(directory):
     return os.path.join(directory,newfile)
 
 def send_events_from_file(filehandle):
-    global current_System
-    global current_Station
     for line in filehandle:
         entry = json.loads(line)
         if (entry['event'] == 'ColonisationConstructionDepot'):
@@ -65,12 +63,11 @@ def send_events():
         gui_statvar.set('Reading from Journal file:\n'+newjournal)
         if file:
             file.close()
-        journal_path = newjournal
         file = open(journal_path,'r')
         if file:
             send_events_from_file(file)
     # call me again in 100 milliseconds
-    root.after(400,send_events)
+    root.after(200,send_events)
 
 
 root = tk.Tk()
