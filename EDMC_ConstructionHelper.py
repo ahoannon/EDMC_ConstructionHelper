@@ -6,14 +6,18 @@ from tkinter import ttk
 # ---- EDMC logger setup ----
 import logging
 import os
-from config import appname
+try:
+    from config import appname
+    
+    plugin_name = os.path.basename(os.path.dirname(__file__))
+    logger = logging.getLogger(f'{appname}.{plugin_name}')
+    # The logger should have been set up by the EDMC core
+    if not logger.hasHandlers():
+        print("I thought this wouldn't happen again in current version of EDMC!")
+except ModuleNotFoundError:
+    # We are not running from EDMC
+    logger = logging.getLogger(__name__)
 
-plugin_name = os.path.basename(os.path.dirname(__file__))
-logger = logging.getLogger(f'{appname}.{plugin_name}')
-
-# The logger should have been set up by the EDMC core
-if not logger.hasHandlers():
-    print("I thought this wouldn't happen again in current version of EDMC!")
 # ---- EDMC logger setup end ----
    
 class ConstructionHelper():
@@ -80,7 +84,7 @@ class ConstructionHelper():
         Name = ""
         # Name for System colonization ship
         if ((self.SiteNames[MarketID]['StationType'] == 'SurfaceStation') and
-            (self.SiteNames[MarketID]['StationName'] == '$EXT_PANEL_ColonisationShip:#index=1;')):
+            (self.SiteNames[MarketID]['StationName'].split(';')[0] == '$EXT_PANEL_ColonisationShip')):
             Name = self.SiteNames[MarketID]['System']+": Primary Port"
         elif (self.SiteNames[MarketID]['StationType'] == 'SpaceConstructionDepot'):
             Name = self.SiteNames[MarketID]['System']+": Orbital Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
