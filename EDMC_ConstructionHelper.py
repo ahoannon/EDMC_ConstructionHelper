@@ -84,7 +84,7 @@ class ConstructionHelper():
         Name = ""
         # Name for System colonization ship
         if ((self.SiteNames[MarketID]['StationType'] == 'SurfaceStation') and
-            (self.SiteNames[MarketID]['StationName'] == '$EXT_PANEL_ColonisationShip:#index=1;')):
+            (self.SiteNames[MarketID]['StationName'].split(';')[0] == '$EXT_PANEL_ColonisationShip')):
             Name = self.SiteNames[MarketID]['System']+": Primary Port"
         elif (self.SiteNames[MarketID]['StationType'] == 'SpaceConstructionDepot'):
             Name = self.SiteNames[MarketID]['System']+": Orbital Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
