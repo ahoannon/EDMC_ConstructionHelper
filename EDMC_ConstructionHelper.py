@@ -51,13 +51,16 @@ class ConstructionHelper():
         #  uncomment the line with 'grey4' to use the dark-theme background color
         self.config_listboxBG = False
         # self.config_listboxBG = 'grey4'
-        
+
+        # maximum number of station economies to display:
+        self.config_max_economies = 4
         # -------- Internal data structures --------
         self.SiteNames = {}
         self.GoodsRequired = {}
         self.goods_string = tk.StringVar()
         self.values_string = tk.StringVar()
         self.listbox_items = tk.StringVar()
+        self.station_economy = tk.StringVar()
         self.listbox_IDs = []
         self.listbox_stations = []
 
@@ -79,6 +82,7 @@ class ConstructionHelper():
             self.SiteNames[entry['MarketID']]['Name'] = self.GetShortStationName(entry['MarketID'])
             if update_list:
                 self.update_listbox()
+        self.UpdateEconomy(entry)
 
     def GetShortStationName(self,MarketID):
         Name = ""
@@ -90,6 +94,8 @@ class ConstructionHelper():
             Name = self.SiteNames[MarketID]['System']+": Orbital Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
         elif (self.SiteNames[MarketID]['StationType'] == 'PlanetaryConstructionDepot'):
             Name = self.SiteNames[MarketID]['System']+": Planetary Site"+ self.SiteNames[MarketID]['StationName'].split(':')[1]
+        elif ('StationName_Localised' in self.SiteNames[MarketID]):
+            Name = self.SiteNames[MarketID]['System']+": "+self.SiteNames[MarketID]['StationName_Localised']
         else:
             Name = self.SiteNames[MarketID]['System']+": "+self.SiteNames[MarketID]['StationName']
         return Name
@@ -126,6 +132,51 @@ class ConstructionHelper():
                 self.update_listbox()
                 self.update_values()
 
+    def UpdateEconomy(self,entry):
+        """
+        "StationEconomies":[ { "Name":"$economy_HighTech;", "Name_Localised":"High Tech", "Proportion":2.300000 }, { "Name":"$economy_Military;", "Name_Localised":"Military", "Proportion":0.400000 } ]
+        """        
+        if "StationEconomies" in entry:
+            proportion_sum = 0.
+            econ_names = []
+            econ_prop = []
+            for econ_dict in entry["StationEconomies"]:
+                if econ_dict["Name"] == "$economy_Agri;":
+                    econ_names.append(" Agr:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Extraction;":
+                    econ_names.append(" Ext:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Industrial;":
+                    econ_names.append(" Ind:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_HighTech;":
+                    econ_names.append(" HT:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Military;":
+                    econ_names.append(" Mil:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Refinery;":
+                    econ_names.append(" Ref:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Tourism;":
+                    econ_names.append(" Tour:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Terraforming;":
+                    econ_names.append(" Ter:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Service;":
+                    econ_names.append(" Serv:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Carrier;":
+                    econ_names.append(" Car:{0:.1f}%")
+                elif econ_dict["Name"] == "$economy_Colony;":
+                    econ_names.append(" Col:{0:.1f}%")
+                else:
+                    econ_names.append("Unk:")
+                econ_prop.append(float(econ_dict["Proportion"]))
+                proportion_sum += float(econ_dict["Proportion"])
+            economy_string = "=> " +self.SiteNames[entry['MarketID']]['Name'] + "\n==>"
+            for ind in range(len(econ_names)):
+                if ind < self.config_max_economies:
+                    economy_string += econ_names[ind].format(econ_prop[ind]/proportion_sum*100.)
+                elif ind == self.config_max_economies:
+                    economy_string += ' +'
+            self.station_economy.set(economy_string)
+        return
+
+                
     def open_overlay(self):
         self.gui_overlay = tk.Toplevel()
         self.gui_overlay.config(bg="black")
@@ -192,6 +243,9 @@ class ConstructionHelper():
         self.gui_button_close.grid_remove()
         self.gui_frame.grid_columnconfigure(0, weight=1)
         self.gui_frame.grid_columnconfigure(1, weight=1)
+        self.gui_economies = tk.Label(self.gui_frame, textvariable=self.station_economy,
+                                      justify=tk.LEFT )
+        self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
 
         self.update_listbox()
         self.update_values()
