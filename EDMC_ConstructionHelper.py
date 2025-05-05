@@ -53,7 +53,7 @@ class ConstructionHelper():
         # self.config_listboxBG = 'grey4'
 
         # maximum number of station economies to display:
-        self.config_max_economies = 4
+        self.config_max_economies = 6
         # -------- Internal data structures --------
         self.SiteNames = {}
         self.GoodsRequired = {}
@@ -169,6 +169,8 @@ class ConstructionHelper():
                 proportion_sum += float(econ_dict["Proportion"])
             economy_string = "=> " +self.SiteNames[entry['MarketID']]['Name'] + "\n==>"
             for ind in range(len(econ_names)):
+                if ind > 0:
+                    economy_string += ','
                 if ind < self.config_max_economies:
                     economy_string += econ_names[ind].format(econ_prop[ind]/proportion_sum*100.)
                 elif ind == self.config_max_economies:

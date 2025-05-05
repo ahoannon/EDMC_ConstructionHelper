@@ -14,8 +14,9 @@ from EDMC_ConstructionHelper import ConstructionHelper
 journal_directory = '/home/driss/Elite-Dangerous-Journals'
 
 # setup logger in case I'll actually use it sometime
-logger = logging.getLogger(__name__)
-logging.basicConfig(filename='ConstructionHelper.log', level=logging.INFO)
+#logger = logging.getLogger(__name__)
+#logging.basicConfig(filename='ConstructionHelper.log', level=logging.INFO)
+logging.getLogger().addHandler(logging.NullHandler())
 
 #global variables
 current_System = 'Unknown System'
