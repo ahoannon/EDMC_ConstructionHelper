@@ -4,12 +4,12 @@ EDMC Construction Helper class
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
-# import EDMC theme support
-from theme import theme
 # ---- EDMC logger setup ----
 import logging
 import os
 try:
+    # import EDMC theme support
+    from theme import theme
     from config import appname, config
     
     plugin_name = os.path.basename(os.path.dirname(__file__))
@@ -21,6 +21,7 @@ except ModuleNotFoundError:
     # We are not running from EDMC
     logger = logging.getLogger(__name__)
     config = False
+    theme = False
 
 # ---- EDMC logger setup end ----
    
@@ -277,7 +278,8 @@ class ConstructionHelper():
 
         self.update_listbox()
         self.update_values()
-        self.theme = theme.active
+        if theme:
+            self.theme = theme.active
         return self.gui_frame
 
     def fix_theme(self):
