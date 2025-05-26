@@ -4,6 +4,8 @@ EDMC Construction Helper class
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
+# import EDMC theme support
+from theme import theme
 # ---- EDMC logger setup ----
 import logging
 import os
@@ -51,14 +53,10 @@ class ConstructionHelper():
         self.config_listboxHeight = 4
         # minimum width on the site selection listbox in "characters"
         self.config_listboxWidth = 35
-        # option to set the BG color of the listbox
-        #  until I figure out how to use the EMDC UI theme
-        #  uncomment the line with 'grey4' to use the dark-theme background color
-        self.config_listboxBG = False
-        # self.config_listboxBG = 'grey4'
 
         # maximum number of station economies to display:
         self.config_max_economies = 6
+
         # -------- Internal data structures --------
         self.SiteNames = {}
         self.GoodsRequired = {}
@@ -252,8 +250,6 @@ class ConstructionHelper():
                                       selectmode=tk.EXTENDED, exportselection=False,
                                       height=1, width=self.config_listboxWidth);
         self.gui_listbox.bind("<<ListboxSelect>>",self.update_values)
-        if self.config_listboxBG:
-            self.gui_listbox.configure(background=self.config_listboxBG)
         self.gui_scrollbar = tk.Scrollbar(self.gui_frame, orient=tk.VERTICAL,
                                           command=self.gui_listbox.yview)
         self.gui_listbox.configure(yscrollcommand=self.gui_scrollbar.set)
@@ -281,9 +277,19 @@ class ConstructionHelper():
 
         self.update_listbox()
         self.update_values()
-        
+        self.theme = theme.active
         return self.gui_frame
-    
+
+    def fix_theme(self):
+        #patched in theme support
+        #ugly solution, needs to be imporved!
+        if self.theme != theme.active:
+            if theme.active > 0:
+                self.gui_listbox.configure(background='grey4')
+            else:
+                self.gui_listbox.configure(background='white')
+        self.theme = theme.active
+
     def update_listbox(self,clear=False):
         # if we don't know of any construction projects then clear out the listbox and display
         if len(self.GoodsRequired) == 0:

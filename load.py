@@ -43,3 +43,4 @@ def prefs_changed(cmdr, is_beta):
     global CH_Prefix;
     CH_Prefix.save_preferences()
     ConstHelper.get_config()
+    ConstHelper.fix_theme()
