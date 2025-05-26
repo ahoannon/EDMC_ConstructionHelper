@@ -187,15 +187,18 @@ class ConstructionHelper():
         self.update_listbox()
         self.update_values()
         self.gui_frame.after(1000,self.fix_theme)
+        self.theme = theme.active
         return self.gui_frame
 
     def fix_theme(self):
         #patched in theme support
         #ugly solution, needs to be imporved!
-        if theme.active > 0:
-            self.gui_listbox.configure(background='grey4')
-        else:
-            self.gui_listbox.configure(background='white')
+        if self.theme != theme.active:
+            if theme.active > 0:
+                self.gui_listbox.configure(background='grey4')
+            else:
+                self.gui_listbox.configure(background='white')
+        self.theme = theme.active
         self.gui_frame.after(1000,self.fix_theme)
 
     def update_listbox(self,clear=False):
