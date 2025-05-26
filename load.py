@@ -6,13 +6,15 @@ Just dump a list of required resources onto the console
 """
 
 from EDMC_ConstructionHelper import ConstructionHelper
+from ConstHelper_Preference import CH_Preferences
 
 ConstHelper = None
+CH_Prefix = None
 
 def plugin_start3(plugin_dir):
     global ConstHelper;
     ConstHelper = ConstructionHelper(plugin_dir);
-    return 'ConstructionHelper';
+    return ConstHelper.Prefix
 
 def plugin_stop():
     global ConstHelper;
@@ -25,9 +27,16 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         ConstHelper.UpdateGoods(entry,System=system,StationName=station);
     if ((entry['event'] == 'Location') or (entry['event'] == 'Docked')):
         ConstHelper.UpdateStations(entry);
-
         
 def plugin_app(parent):
     global ConstHelper;
     return ConstHelper.init_gui(parent)
     
+
+def plugin_prefs(parent, cmdr, is_beta):
+    global CH_Prefix;
+    CH_Prefix = CH_Preferences(ConstHelper.Prefix)
+    return CH_Prefix.prefs_ui(parent);
+
+
+
