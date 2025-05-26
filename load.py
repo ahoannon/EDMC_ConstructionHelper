@@ -9,7 +9,7 @@ from EDMC_ConstructionHelper import ConstructionHelper
 from ConstHelper_Preference import CH_Preferences
 
 ConstHelper = None
-CH_Prefix = None
+PrefsUI = None
 
 def plugin_start3(plugin_dir):
     global ConstHelper;
@@ -34,13 +34,13 @@ def plugin_app(parent):
     
 
 def plugin_prefs(parent, cmdr, is_beta):
-    global CH_Prefix;
-    CH_Prefix = CH_Preferences(ConstHelper.Prefix)
-    return CH_Prefix.prefs_ui(parent);
+    global PrefsUI;
+    PrefsUI = CH_Preferences(ConstHelper.Prefix)
+    return PrefsUI.prefs_ui(parent);
 
 def prefs_changed(cmdr, is_beta):
     global ConstHelper;
-    global CH_Prefix;
-    CH_Prefix.save_preferences()
+    global PrefsUI;
+    PrefsUI.save_preferences()
     ConstHelper.get_config()
     ConstHelper.fix_theme()
