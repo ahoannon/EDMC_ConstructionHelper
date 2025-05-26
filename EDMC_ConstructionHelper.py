@@ -120,12 +120,6 @@ class ConstructionHelper():
                 self.update_values()
 
     def open_overlay(self):
-        #patched in theme support
-        #ugly solution, needs to be imporved!
-        if theme.active > 0:
-            self.gui_listbox.configure(background='grey4')
-        else:
-            self.gui_listbox.configure(background='white')
         self.gui_overlay = tk.Toplevel()
         self.gui_overlay.config(bg="black")
         self.gui_overlay.overrideredirect(True)
@@ -192,9 +186,18 @@ class ConstructionHelper():
 
         self.update_listbox()
         self.update_values()
-        
+        self.gui_frame.after(1000,self.fix_theme)
         return self.gui_frame
-    
+
+    def fix_theme(self):
+        #patched in theme support
+        #ugly solution, needs to be imporved!
+        if theme.active > 0:
+            self.gui_listbox.configure(background='grey4')
+        else:
+            self.gui_listbox.configure(background='white')
+        self.gui_frame.after(1000,self.fix_theme)
+
     def update_listbox(self,clear=False):
         # if we don't know of any construction projects then clear out the listbox and display
         if len(self.GoodsRequired) == 0:
