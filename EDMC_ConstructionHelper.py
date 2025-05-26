@@ -3,6 +3,7 @@ EDMC Construction Helper class
 """
 import tkinter as tk
 from tkinter import ttk
+import tkinter.font as tkFont
 # ---- EDMC logger setup ----
 import logging
 import os
@@ -223,7 +224,7 @@ class ConstructionHelper():
                                            fg=self.config_overlayFG,
                                            bg=self.config_overlayBG)
         if self.config_fontSize:
-            fontObj = tk.font.Font(size=self.config_fontSize)
+            fontObj = tkFont.Font(size=self.config_fontSize)
             self.gui_overlay_goods.config(font=fontObj)
             self.gui_overlay_values.config(font=fontObj)            
         self.gui_overlay_goods.grid(column=0,row=0,sticky=(tk.E))

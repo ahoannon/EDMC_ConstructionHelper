@@ -38,7 +38,7 @@ class CH_Preferences():
                  "Close and re-open the overlay for setting to take effect.").grid(row=0, column=0, columnspan=4)
         self.create_label_entry(frame, "X-Position (pixels to the right of top left corner):", "overlayX", 0, 1 )
         self.create_label_entry(frame, "Y-Position (pixels down from top left corner):", "overlayY", 0, 2 )
-        self.create_label_entry(frame, "Font Size:", "fontSize", 0, 3 )
+        self.create_label_entry(frame, "Font Size (character height in pixels, 0=default):", "fontSize", 0, 3 )
         self.create_label_entry(frame, "Text Color (TK color string):", "overlayFG", 0, 4)
         self.create_label_entry(frame, "Background Color (TK color string):", "overlayBG", 0, 5)
         self.create_label_entry(frame, "Transparency (1 invisible - 100 opaque):", "Alpha", 0, 6)
