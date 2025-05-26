@@ -38,5 +38,8 @@ def plugin_prefs(parent, cmdr, is_beta):
     CH_Prefix = CH_Preferences(ConstHelper.Prefix)
     return CH_Prefix.prefs_ui(parent);
 
-
-
+def prefs_changed(cmdr, is_beta):
+    global ConstHelper;
+    global CH_Prefix;
+    CH_Prefix.save_preferences()
+    ConstHelper.get_config()
