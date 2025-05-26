@@ -3,6 +3,8 @@ EDMC Construction Helper class
 """
 import tkinter as tk
 from tkinter import ttk
+# import EDMC theme support
+from theme import theme
 # ---- EDMC logger setup ----
 import logging
 import os
@@ -42,11 +44,7 @@ class ConstructionHelper():
         self.config_listboxHeight = 4
         # minimum width on the site selection listbox in "characters"
         self.config_listboxWidth = 35
-        # option to set the BG color of the listbox
-        #  until I figure out how to use the EMDC UI theme
-        #  uncomment the line with 'grey4' to use the dark-theme background color
-        self.config_listboxBG = 'grey4'
-        
+
         # -------- Internal data structures --------
         self.SiteNames = {}
         self.GoodsRequired = {}
@@ -122,6 +120,12 @@ class ConstructionHelper():
                 self.update_values()
 
     def open_overlay(self):
+        #patched in theme support
+        #ugly solution, needs to be imporved!
+        if theme.active > 0:
+            self.gui_listbox.configure(background='grey4')
+        else:
+            self.gui_listbox.configure(background='white')
         self.gui_overlay = tk.Toplevel()
         self.gui_overlay.config(bg="black")
         self.gui_overlay.overrideredirect(True)
@@ -164,8 +168,6 @@ class ConstructionHelper():
                                       selectmode=tk.EXTENDED, exportselection=False,
                                       height=1, width=self.config_listboxWidth);
         self.gui_listbox.bind("<<ListboxSelect>>",self.update_values)
-        if self.config_listboxBG:
-            self.gui_listbox.configure(background=self.config_listboxBG)
         self.gui_scrollbar = tk.Scrollbar(self.gui_frame, orient=tk.VERTICAL,
                                           command=self.gui_listbox.yview)
         self.gui_listbox.configure(yscrollcommand=self.gui_scrollbar.set)
