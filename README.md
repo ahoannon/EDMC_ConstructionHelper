@@ -37,7 +37,7 @@ tries to stay above all other windows, in particular the **ED** game window. If 
 Linux system and it seems to work on a typical windows system if **ED** is not running in fullscreen mode but e.g. in borderless mode. 
 By default the overlay window will be in the top left corner of your (primary) screen but that can be changed.\
 Note: if you can't see the overlay window, check if there is a list of goods displayed in the main **EDMC** window. If there isn't then the overlay window is a 
-small, easy to miss dark rectangle in the corner of your screen. (And it may be fully transparent, making it impossible to see.)
+small, easy to miss, dark rectangle in the corner of your screen. (And it may be fully transparent, making it impossible to see.)
 
 [<picture>
   <img src="https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Overlay_Linux.png" 
