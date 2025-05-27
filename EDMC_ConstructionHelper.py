@@ -101,7 +101,7 @@ class ConstructionHelper():
                 if config.get_str(self.Prefix+"Alpha"):                
                     self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
                 # defaluts to false anyhow:
-                self.do_file_storage = config.get_str(self.Prefix+"DoFile")
+                self.do_file_storage = config.get_bool(self.Prefix+"DoFile")
                 if config.get_str(self.Prefix+"storage_file"):
                     self.storage_file = config.get_str(self.Prefix+"storage_file")
             except ValueError:
