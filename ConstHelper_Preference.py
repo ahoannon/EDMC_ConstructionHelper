@@ -35,7 +35,7 @@ class CH_Preferences():
     def prefs_ui(self, parent: nb.Notebook):
         frame = nb.Frame(parent)
         nb.Label(frame, text="Settings for the overlay window. "
-                 "Close and re-open the overlay for setting to take effect.").grid(row=0, column=0, columnspan=4)
+                 "Close and re-open the overlay for settings to take effect.").grid(row=0, column=0, columnspan=4)
         self.create_label_entry(frame, "X-Position (pixels to the right of top left corner):", "overlayX", 0, 1 )
         self.create_label_entry(frame, "Y-Position (pixels down from top left corner):", "overlayY", 0, 2 )
         self.create_label_entry(frame, "Font Size (character height in pixels, 0=default):", "fontSize", 0, 3 )
