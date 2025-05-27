@@ -55,8 +55,9 @@ small, easy to miss, dark rectangle in the corner of your screen. (And it may be
    alt="Screenshot Preferences.png" height="200" />
 </picture>](https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Preferences.png)
 
-You can set parameters for the overlay window in the preferences. No real range or other checking is done. If you enter invalid values then it will probably fail 
-in some random way or another. The string for the colors can either be a hex RGB value like the default for the text color, or a color name that TK understands.
+You can set parameters for the overlay window in the preferences. No real range- or other checking is done. So if you enter invalid values then it will probably 
+fail in some random way or another. The string for the colors can either be a hex RGB value like the default for the text color, or a color name that TK 
+understands.
 
 ## Technical Stuff
 
