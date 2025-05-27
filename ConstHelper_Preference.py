@@ -58,6 +58,7 @@ class CH_Preferences():
                                                   command=self.toggle_file_entry)
         self.file_storage_button.grid(row=8, column=0,columnspan=4)
         self.create_label_entry(frame, "Storage file incl. path:", "storage_file", 0, 9)
+        self.storage_file_entry.config(width=60)
         self.storage_file_entry.grid(columnspan=3)
         self.DoFile_var.set(config.get_bool(self.Prefix+"DoFile"))
         self.toggle_file_entry()

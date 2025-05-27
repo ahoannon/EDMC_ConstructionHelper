@@ -60,7 +60,6 @@ class ConstructionHelper():
         self.storage_file = ""
         # don't store data entries that are older than this (in seconds)
         self.storage_timeout = 604800 # 7 days
-        #self.storage_timeout = 86400 # 1 day
         
         # maximum height of the site selection listbox
         self.config_listboxHeight = 4
