@@ -1,6 +1,10 @@
 """
 EDMC Construction Helper class
 """
+import time
+import threading
+from datetime import datetime
+import json
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
@@ -50,6 +54,14 @@ class ConstructionHelper():
         #Windows-only: make overlay background fully transparent
         self.config_BGtrans = False
 
+        # store site data to a local file 
+        self.do_file_storage = False
+        # if so, give the path to the file
+        self.storage_file = ""
+        # don't store data entries that are older than this (in seconds)
+        self.storage_timeout = 604800 # 7 days
+        #self.storage_timeout = 86400 # 1 day
+        
         # maximum height of the site selection listbox
         self.config_listboxHeight = 4
         # minimum width on the site selection listbox in "characters"
@@ -61,30 +73,38 @@ class ConstructionHelper():
         # -------- Internal data structures --------
         self.SiteNames = {}
         self.GoodsRequired = {}
+        self.GoodsTimestamp = {}
+        self.DepotEvents = {}
         self.goods_string = tk.StringVar()
         self.values_string = tk.StringVar()
         self.listbox_items = tk.StringVar()
         self.station_economy = tk.StringVar()
         self.listbox_IDs = []
         self.listbox_stations = []
+        self.worker_thread = False
         self.get_config()
         self.set_config()
 
+#---------- handle configuration
     def get_config(self):
         if config:
             try:
                 if config.get_str(self.Prefix+"overlayX"):
-                                  self.config_overlayX = int(config.get_str(self.Prefix+"overlayX"))
+                    self.config_overlayX = int(config.get_str(self.Prefix+"overlayX"))
                 if config.get_str(self.Prefix+"overlayY"):
-                                  self.config_overlayY = int(config.get_str(self.Prefix+"overlayY"))
+                    self.config_overlayY = int(config.get_str(self.Prefix+"overlayY"))
                 if config.get_str(self.Prefix+"fontSize"):
-                                  self.config_fontSize = int(config.get_str(self.Prefix+"fontSize"))
+                    self.config_fontSize = int(config.get_str(self.Prefix+"fontSize"))
                 if config.get_str(self.Prefix+"overlayFG"):
                     self.config_overlayFG = config.get_str(self.Prefix+"overlayFG")
                 if config.get_str(self.Prefix+"overlayFG"):
                     self.config_overlayBG = config.get_str(self.Prefix+"overlayBG")
-                if config.get_int(self.Prefix+"Alpha"):                
+                if config.get_str(self.Prefix+"Alpha"):                
                     self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
+                # defaluts to false anyhow:
+                self.do_file_storage = config.get_str(self.Prefix+"DoFile")
+                if config.get_str(self.Prefix+"storage_file"):
+                    self.storage_file = config.get_str(self.Prefix+"storage_file")
             except ValueError:
                 pass
             
@@ -96,7 +116,10 @@ class ConstructionHelper():
            config.set(self.Prefix+"overlayFG", str(self.config_overlayFG))
            config.set(self.Prefix+"overlayBG", str(self.config_overlayBG))
            config.set(self.Prefix+"Alpha", str(int(self.config_Alpha*100)))
+           config.set(self.Prefix+"DoFile", bool(self.do_file_storage))
+           config.set(self.Prefix+"storage_file", str(self.storage_file))
 
+#---------- handle station names
     def UpdateStations(self,entry):
         if ('MarketID' not in entry):
             return
@@ -132,8 +155,16 @@ class ConstructionHelper():
         else:
             Name = self.SiteNames[MarketID]['System']+": "+self.SiteNames[MarketID]['StationName']
         return Name
-                
+
+#---------- handle the resources and economy events
     def UpdateGoods(self,entry,System="",StationName=""):
+        #print("UpdateGoods called from:",threading.current_thread().name);
+        # ignore older events
+        if (entry['MarketID'] in self.GoodsTimestamp and
+            datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ")  <=  self.GoodsTimestamp[entry['MarketID']]):
+            #print("Ignored one event")
+            return
+        # process the event
         if (entry['ConstructionComplete'] == False and
             entry['ConstructionFailed'] == False):
             current = {}
@@ -148,17 +179,20 @@ class ConstructionHelper():
                 self.GoodsRequired[entry['MarketID']] != current ):
                 # Goods required new or updated
                 self.GoodsRequired[entry['MarketID']] = current
+                self.GoodsTimestamp[entry['MarketID']] = datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ")
+                self.DepotEvents[entry['MarketID']] = entry
                 if entry['MarketID'] not in self.SiteNames:
                     self.SiteNames[entry['MarketID']] = {}
                     self.SiteNames[entry['MarketID']]['StationName'] = StationName
                     self.SiteNames[entry['MarketID']]['System'] = System
-                    self.SiteNames[entry['MarketID']]['Name'] = StationName
+                    self.SiteNames[entry['MarketID']]['Name'] = System+':'+StationName
                 #print("\nUpdated  resources required for Market:",self.SiteNames[entry['MarketID']]['Name'])
-            if entry['MarketID'] not in self.listbox_IDs:
-                self.update_listbox(clear=True)
-                idx = self.listbox_IDs.index(entry['MarketID'])
-                self.gui_listbox.selection_set(idx)
-            self.update_values()
+                if entry['MarketID'] not in self.listbox_IDs:
+                    self.update_listbox(clear=True)
+                    idx = self.listbox_IDs.index(entry['MarketID'])
+                    self.gui_listbox.selection_set(idx)
+                self.update_values()
+                self.safe_data()
         else: #Construction is either complete or has failed
             if entry['MarketID'] in self.GoodsRequired:
                 self.GoodsRequired.pop(entry['MarketID'])
@@ -211,7 +245,7 @@ class ConstructionHelper():
             self.station_economy.set(economy_string)
         return
 
-                
+#---------- open and close the overlay window                
     def open_overlay(self):
         self.gui_overlay = tk.Toplevel()
         self.gui_overlay.config(bg="black")
@@ -245,7 +279,9 @@ class ConstructionHelper():
         self.gui_overlay.destroy()
         self.gui_button_open.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
         self.gui_button_close.grid_remove()
- 
+
+
+#---------- hand the general GUI
     def init_gui(self,parent):
         self.parent = parent
         self.gui_frame = tk.Frame(parent, borderwidth=0)
@@ -279,9 +315,12 @@ class ConstructionHelper():
         self.gui_economies = tk.Label(self.gui_frame, textvariable=self.station_economy,
                                       justify=tk.LEFT )
         self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
-
+        
         self.update_listbox()
         self.update_values()
+        # This is the very first time we start the worker, so don't need to check him
+        self.worker_thread = threading.Thread(target=self.read_data, name="Worker")
+        self.worker_thread.start()
         if theme:
             self.theme = theme.active
         return self.gui_frame
@@ -296,6 +335,7 @@ class ConstructionHelper():
                 self.gui_listbox.configure(background='white')
         self.theme = theme.active
 
+#---------- update the display
     def update_listbox(self,clear=False):
         # if we don't know of any construction projects then clear out the listbox and display
         if len(self.GoodsRequired) == 0:
@@ -352,4 +392,57 @@ class ConstructionHelper():
             self.goods_string.set(goods[:-1])
             self.values_string.set(values[:-1])
 
-            
+#---------- handle storage of data
+
+    def get_storage_string(self):
+        #start with a "StationNames" pseudo event
+        namesdict = {"event":"StationNames" ,
+                     "Station_IDs":self.listbox_IDs,
+                     "StationNames":self.listbox_stations}
+        outstring = json.dumps(namesdict)+'\n'        
+        for marketID in self.listbox_IDs:
+            timediff = datetime.now() - self.GoodsTimestamp[marketID]
+            if timediff.total_seconds() < self.storage_timeout:
+                outstring += json.dumps(self.DepotEvents[marketID])+'\n'
+            else:
+                print('Market',marketID,'timed out.')
+        return outstring
+
+    def data_to_file(self, filepath):
+        #print("Writing data to:",filepath)
+        with open(filepath, 'wt') as filehandle:
+            filehandle.write(self.get_storage_string())
+        return
+        
+    def safe_data(self):
+        if (self.worker_thread and self.worker_thread.is_alive()):
+            #print("Worker Thread still busy.")
+            return
+        if self.worker_thread:
+            self.worker_thread.join();
+        if (self.do_file_storage and self.storage_file):
+            self.worker_thread = threading.Thread(target=lambda:self.data_to_file(self.storage_file),
+                                                  name="Worker")
+            self.worker_thread.start()
+
+    def read_data(self):
+        if (self.do_file_storage and self.storage_file and
+            os.path.isfile(self.storage_file)):
+            with open(self.storage_file, 'rt') as filehandle:
+                for line in filehandle:
+                    entry = json.loads(line)
+                    #print(entry['event'])
+                    if (entry['event'] == 'StationNames'):
+                        for index in range(len(entry['Station_IDs'])):
+                            marketID = entry['Station_IDs'][index]
+                            if marketID not in self.SiteNames:
+                                system,station = entry['StationNames'][index].split(':')
+                                self.SiteNames[marketID] = {}
+                                self.SiteNames[marketID]['StationName'] = station
+                                self.SiteNames[marketID]['System'] = system
+                                self.SiteNames[marketID]['Name'] = entry['StationNames'][index]
+                    if (entry['event'] == 'ColonisationConstructionDepot'):                        
+                        self.gui_frame.after(10, lambda: self.UpdateGoods(entry,System="Unknown System",
+                                                                          StationName="Unknown Station"));
+                        time.sleep(0.1)
+                        
