@@ -50,8 +50,13 @@ small, easy to miss dark rectangle in the corner of your screen. (And it may be 
 
 ### Customization
 
-Until I get around to writing a preferences gui you can customize things like the position of the overlay window, the font size and color in there, etc. by 
-opening the file `EDMC_ConstructionHelper.py` and changing the values for the settings in the upper part of the file.
+[<picture>
+  <img src="https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Preferences.png" 
+   alt="Screenshot Preferences.png" height="200" />
+</picture>](https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Preferences.png)
+
+You can set parameters for the overlay window in the preferences. No real range or other checking is done. If you enter invalid values then it will probably fail 
+in some random way or another. The string for the colors can either be a hex RGB value like the default for the text color, or a color name that TK understands.
 
 ## Technical Stuff
 
@@ -68,7 +73,6 @@ Greetings, CMDR Hans Wijn
 ## ToDo 
 
 - find and fix bugs
-- preferences gui
 - remove construction sites finished by someone else
 - display current ship cargo
 - sort goods by category
