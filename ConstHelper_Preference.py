@@ -47,9 +47,9 @@ class CH_Preferences():
 
 
     def save_preferences(self):
-        config.set(self.Prefix+"overlayX", int(self.overlayX_entry.get()))
-        config.set(self.Prefix+"overlayY", int(self.overlayY_entry.get()))
-        config.set(self.Prefix+"fontSize", int(self.fontSize_entry.get()))
+        config.set(self.Prefix+"overlayX", str(int(self.overlayX_entry.get())))
+        config.set(self.Prefix+"overlayY", str(int(self.overlayY_entry.get())))
+        config.set(self.Prefix+"fontSize", str(int(self.fontSize_entry.get())))
         config.set(self.Prefix+"overlayFG", self.overlayFG_entry.get())
         config.set(self.Prefix+"overlayBG", self.overlayBG_entry.get())
-        config.set(self.Prefix+"Alpha", int(self.Alpha_entry.get()))
+        config.set(self.Prefix+"Alpha", str(int(self.Alpha_entry.get())))

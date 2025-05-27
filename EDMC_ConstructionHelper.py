@@ -86,12 +86,12 @@ class ConstructionHelper():
 
     def set_config(self):
         if config:
-           config.set(self.Prefix+"overlayX", self.config_overlayX)
-           config.set(self.Prefix+"overlayY", self.config_overlayY)
-           config.set(self.Prefix+"fontSize", self.config_fontSize)
-           config.set(self.Prefix+"overlayFG", self.config_overlayFG)
-           config.set(self.Prefix+"overlayBG", self.config_overlayBG)
-           config.set(self.Prefix+"Alpha", int(self.config_Alpha*100))
+           config.set(self.Prefix+"overlayX", str(self.config_overlayX))
+           config.set(self.Prefix+"overlayY", str(self.config_overlayY))
+           config.set(self.Prefix+"fontSize", str(self.config_fontSize))
+           config.set(self.Prefix+"overlayFG", str(self.config_overlayFG))
+           config.set(self.Prefix+"overlayBG", str(self.config_overlayBG))
+           config.set(self.Prefix+"Alpha", str(int(self.config_Alpha*100)))
 
     def UpdateStations(self,entry):
         if ('MarketID' not in entry):
