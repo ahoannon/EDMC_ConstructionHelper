@@ -73,16 +73,16 @@ class ConstructionHelper():
     def get_config(self):
         if config:
             # these default to 0 either way
-            self.config_overlayX = config.get_int(self.Prefix+"overlayX")
-            self.config_overlayY = config.get_int(self.Prefix+"overlayY")
-            self.config_fontSize = config.get_int(self.Prefix+"fontSize")
+            self.config_overlayX = int(config.get_str(self.Prefix+"overlayX"))
+            self.config_overlayY = int(config.get_str(self.Prefix+"overlayY"))
+            self.config_fontSize = int(config.get_str(self.Prefix+"fontSize"))
             # set these only if set
             if config.get_str(self.Prefix+"overlayFG"):
                 self.config_overlayFG = config.get_str(self.Prefix+"overlayFG")
             if config.get_str(self.Prefix+"overlayFG"):
                 self.config_overlayBG = config.get_str(self.Prefix+"overlayBG")
             if config.get_int(self.Prefix+"Alpha"):                
-                self.config_Alpha = config.get_int(self.Prefix+"Alpha")/100.
+                self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
 
     def set_config(self):
         if config:
