@@ -72,18 +72,22 @@ class ConstructionHelper():
 
     def get_config(self):
         if config:
-            # these default to 0 either way
-            self.config_overlayX = int(config.get_str(self.Prefix+"overlayX"))
-            self.config_overlayY = int(config.get_str(self.Prefix+"overlayY"))
-            self.config_fontSize = int(config.get_str(self.Prefix+"fontSize"))
-            # set these only if set
-            if config.get_str(self.Prefix+"overlayFG"):
-                self.config_overlayFG = config.get_str(self.Prefix+"overlayFG")
-            if config.get_str(self.Prefix+"overlayFG"):
-                self.config_overlayBG = config.get_str(self.Prefix+"overlayBG")
-            if config.get_int(self.Prefix+"Alpha"):                
-                self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
-
+            try:
+                if config.get_str(self.Prefix+"overlayX"):
+                                  self.config_overlayX = int(config.get_str(self.Prefix+"overlayX"))
+                if config.get_str(self.Prefix+"overlayY"):
+                                  self.config_overlayY = int(config.get_str(self.Prefix+"overlayY"))
+                if config.get_str(self.Prefix+"fontSize"):
+                                  self.config_fontSize = int(config.get_str(self.Prefix+"fontSize"))
+                if config.get_str(self.Prefix+"overlayFG"):
+                    self.config_overlayFG = config.get_str(self.Prefix+"overlayFG")
+                if config.get_str(self.Prefix+"overlayFG"):
+                    self.config_overlayBG = config.get_str(self.Prefix+"overlayBG")
+                if config.get_int(self.Prefix+"Alpha"):                
+                    self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
+            except ValueError:
+                pass
+            
     def set_config(self):
         if config:
            config.set(self.Prefix+"overlayX", str(self.config_overlayX))
