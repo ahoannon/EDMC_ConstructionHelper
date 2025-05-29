@@ -78,8 +78,8 @@ class ConstructionHelper():
         self.ftp_filepath = ""
         # minimum time between ftp uploads
         self.ftp_upload_delay = 120
-         # minimum time between ftp downloads
-        self.ftp_download_delay = 120
+        # minimum time between ftp downloads
+        self.ftp_download_delay = 60
         
         # maximum height of the site selection listbox
         self.config_listboxHeight = 4
@@ -101,7 +101,7 @@ class ConstructionHelper():
         self.listbox_IDs = []
         self.listbox_stations = []
         self.last_ftp_upload = datetime(2025, 5, 26)
-        self.last_ftp_upload = datetime(2025, 5, 26)
+        self.last_ftp_download = datetime(2025, 5, 26)
         self.worker_thread = False
         self.get_config()
         self.set_config()
@@ -287,14 +287,26 @@ class ConstructionHelper():
                     economy_string += ' +'
             self.station_economy.set(economy_string)
         return
-    
-    def ContributionHandler(self, entry):
-        #give it 100 ms to handle the incomming ConstructionDepot event then save to ftp.
+
+#---------- handle the ftp store and retrieve events
+    def initiate_ftp_send(self):
         if self.do_ftp_storage:
             tdiff = datetime.now() - self.last_ftp_upload
             if (tdiff.total_seconds() > self.ftp_upload_delay):
+                #give it 100 ms to handle the incomming ConstructionDepot event then save to ftp.
                 self.gui_frame.after(100,self.ftp_store)
-    
+
+    def initiate_ftp_get(self, entry):
+        if self.do_ftp_storage:
+            tdiff = datetime.now() - self.last_ftp_download
+            if (tdiff.total_seconds() > self.ftp_download_delay):
+               if ((entry['StationType'] == "SpaceConstructionDepot") or
+                   (entry['StationType'] == "PlanetaryConstructionDepot") or
+                   (entry['StationName'].split(';')[0] == '$EXT_PANEL_ColonisationShip')):
+                   return
+               self.ftp_get()
+
+               
 #---------- open and close the overlay window                
     def open_overlay(self):
         self.gui_overlay = tk.Toplevel()
@@ -536,5 +548,41 @@ class ConstructionHelper():
             self.ftp_user and self.ftp_password and self.ftp_filepath):
             # we have all required data and are asked to do it
             self.worker_thread = threading.Thread(target=self.do_ftp_store, name="Worker")
+            self.worker_thread.start()
+
+    def do_ftp_get(self):
+        print('do_ftp_get called in:',threading.current_thread().name)
+        file_obj = BytesIO()
+        with FTP(self.ftp_server) as ftp:
+            ftp.login(user=self.ftp_user, passwd=self.ftp_password)
+            ftp.retrbinary(f"RETR {self.ftp_filepath}", file_obj.write)
+        file_obj.seek(0)
+        for line in file_obj:
+            entry = json.loads(line)
+            if (entry['event'] == 'StationNames'):
+                for index in range(len(entry['Station_IDs'])):
+                    marketID = entry['Station_IDs'][index]
+                    if marketID not in self.SiteNames:
+                        system,station = entry['StationNames'][index].split(':')
+                        self.SiteNames[marketID] = {}
+                        self.SiteNames[marketID]['StationName'] = station
+                        self.SiteNames[marketID]['System'] = system
+                        self.SiteNames[marketID]['Name'] = entry['StationNames'][index]
+            if (entry['event'] == 'ColonisationConstructionDepot'):                        
+                self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
+                                                                  StationName="Unknown Station"));
+                time.sleep(0.01) # don't hammer the main thread
+        self.last_ftp_download = datetime.now()
+
+    def ftp_get(self):
+        if (self.worker_thread and self.worker_thread.is_alive()):
+            #print("Worker Thread still busy.")
+            return
+        if self.worker_thread:
+            self.worker_thread.join();
+        if (self.do_ftp_storage and self.ftp_server and
+            self.ftp_user and self.ftp_password and self.ftp_filepath):
+            # we have all required data and are asked to do it
+            self.worker_thread = threading.Thread(target=self.do_ftp_get, name="Worker")
             self.worker_thread.start()
 
