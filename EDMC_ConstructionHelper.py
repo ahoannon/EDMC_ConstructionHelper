@@ -8,6 +8,7 @@ import json
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
+from tkinter import messagebox as mbox
 # ---- EDMC logger setup ----
 import logging
 import os
@@ -159,9 +160,12 @@ class ConstructionHelper():
     def UpdateGoods(self,entry,System="",StationName=""):
         #print("UpdateGoods called from:",threading.current_thread().name);
         # ignore older events
-        if (entry['MarketID'] in self.GoodsTimestamp and
-            datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ")  <=  self.GoodsTimestamp[entry['MarketID']]):
-            #print("Ignored one event")
+        newtime = datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ") 
+        timediff = datetime.now() - newtime
+        if ( (timediff.total_seconds() > self.storage_timeout)  or
+             (entry['MarketID'] in self.GoodsTimestamp and
+              newtime <=  self.GoodsTimestamp[entry['MarketID']])):
+            print("Ignored one event")
             return
         # process the event
         if (entry['ConstructionComplete'] == False and
@@ -178,7 +182,7 @@ class ConstructionHelper():
                 self.GoodsRequired[entry['MarketID']] != current ):
                 # Goods required new or updated
                 self.GoodsRequired[entry['MarketID']] = current
-                self.GoodsTimestamp[entry['MarketID']] = datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ")
+                self.GoodsTimestamp[entry['MarketID']] = newtime
                 self.DepotEvents[entry['MarketID']] = entry
                 if entry['MarketID'] not in self.SiteNames:
                     self.SiteNames[entry['MarketID']] = {}
@@ -290,6 +294,7 @@ class ConstructionHelper():
                                       selectmode=tk.EXTENDED, exportselection=False,
                                       height=1, width=self.config_listboxWidth);
         self.gui_listbox.bind("<<ListboxSelect>>",self.update_values)
+        self.gui_listbox.bind("<Double-1>",self.remove_sites)
         self.gui_scrollbar = tk.Scrollbar(self.gui_frame, orient=tk.VERTICAL,
                                           command=self.gui_listbox.yview)
         self.gui_listbox.configure(yscrollcommand=self.gui_scrollbar.set)
@@ -324,6 +329,22 @@ class ConstructionHelper():
             self.theme = theme.active
         return self.gui_frame
 
+    def remove_sites(self,ButtonPress):
+        #print("remove:",type(ButtonPress))
+        removeText = "Remove the following site(s)?\n"        
+        for idx in self.gui_listbox.curselection():
+            removeText += "- "+self.listbox_stations[idx]+"\n"
+            print("selected site:",self.listbox_stations[idx])        
+        print("")
+        result = mbox.askokcancel("Remove Sites", removeText,icon=mbox.WARNING)
+        if result:
+            for idx in self.gui_listbox.curselection():
+                self.GoodsRequired.pop(self.listbox_IDs[idx])
+            self.update_listbox()
+            self.update_values()
+            self.safe_data()
+        pass
+    
     def fix_theme(self):
         #patched in theme support
         #ugly solution, needs to be imporved!
