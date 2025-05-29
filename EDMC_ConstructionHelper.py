@@ -9,6 +9,8 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
 from tkinter import messagebox as mbox
+from ftplib import FTP
+from io import BytesIO
 # ---- EDMC logger setup ----
 import logging
 import os
@@ -54,13 +56,30 @@ class ConstructionHelper():
         self.config_Alpha = 0.7
         #Windows-only: make overlay background fully transparent
         self.config_BGtrans = False
-
+        # display the economy composition of a station the user is docked to
+        self.show_economy = True
+        
         # store site data to a local file 
         self.do_file_storage = False
         # if so, give the path to the file
         self.storage_file = ""
         # don't store data entries that are older than this (in seconds)
         self.storage_timeout = 604800 # 7 days
+
+        # store data on remote ftp server
+        self.do_ftp_storage = False
+        # name of ftp-server
+        self.ftp_server = ""
+        # username on ftp-server
+        self.ftp_user = ""
+        # password on ftp-server
+        self.ftp_password = ""
+        # path to file on ftp-server
+        self.ftp_filepath = ""
+        # minimum time between ftp uploads
+        self.ftp_upload_delay = 120
+         # minimum time between ftp downloads
+        self.ftp_download_delay = 120
         
         # maximum height of the site selection listbox
         self.config_listboxHeight = 4
@@ -81,6 +100,8 @@ class ConstructionHelper():
         self.station_economy = tk.StringVar()
         self.listbox_IDs = []
         self.listbox_stations = []
+        self.last_ftp_upload = datetime(2025, 5, 26)
+        self.last_ftp_upload = datetime(2025, 5, 26)
         self.worker_thread = False
         self.get_config()
         self.set_config()
@@ -100,11 +121,23 @@ class ConstructionHelper():
                 if config.get_str(self.Prefix+"overlayFG"):
                     self.config_overlayBG = config.get_str(self.Prefix+"overlayBG")
                 if config.get_str(self.Prefix+"Alpha"):                
-                    self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
-                # defaluts to false anyhow:
+                    self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.                
+                self.show_economy = config.get_bool(self.Prefix+"ShowEconomy")
+                # defaults to false anyhow:
                 self.do_file_storage = config.get_bool(self.Prefix+"DoFile")
                 if config.get_str(self.Prefix+"storage_file"):
                     self.storage_file = config.get_str(self.Prefix+"storage_file")
+                # yet another defaults to false
+                self.do_ftp_storage = config.get_bool(self.Prefix+"DoFTP")
+                if config.get_str(self.Prefix+"FTPServer"):
+                    self.ftp_server = config.get_str(self.Prefix+"FTPServer")
+                if config.get_str(self.Prefix+"FTPUser"):
+                    self.ftp_user = config.get_str(self.Prefix+"FTPUser")
+                if config.get_str(self.Prefix+"FTPPasswd"):
+                    self.ftp_password = config.get_str(self.Prefix+"FTPPasswd")
+                if config.get_str(self.Prefix+"FTPFilePath"):
+                    self.ftp_filepath = config.get_str(self.Prefix+"FTPFilePath")
+                
             except ValueError:
                 pass
             
@@ -116,8 +149,15 @@ class ConstructionHelper():
            config.set(self.Prefix+"overlayFG", str(self.config_overlayFG))
            config.set(self.Prefix+"overlayBG", str(self.config_overlayBG))
            config.set(self.Prefix+"Alpha", str(int(self.config_Alpha*100)))
+           config.set(self.Prefix+"ShowEconomy", bool(self.show_economy))
            config.set(self.Prefix+"DoFile", bool(self.do_file_storage))
            config.set(self.Prefix+"storage_file", str(self.storage_file))
+           config.set(self.Prefix+"DoFTP", bool(self.do_ftp_storage))
+           config.set(self.Prefix+"FTPServer", str(self.ftp_server))
+           config.set(self.Prefix+"FTPUser", str(self.ftp_user))
+           config.set(self.Prefix+"FTPPasswd", str(self.ftp_password))
+           config.set(self.Prefix+"FTPFilePath", str(self.ftp_filepath))
+
 
 #---------- handle station names
     def UpdateStations(self,entry):
@@ -247,7 +287,14 @@ class ConstructionHelper():
                     economy_string += ' +'
             self.station_economy.set(economy_string)
         return
-
+    
+    def ContributionHandler(self, entry):
+        #give it 100 ms to handle the incomming ConstructionDepot event then save to ftp.
+        if self.do_ftp_storage:
+            tdiff = datetime.now() - self.last_ftp_upload
+            if (tdiff.total_seconds() > self.ftp_upload_delay):
+                self.gui_frame.after(100,self.ftp_store)
+    
 #---------- open and close the overlay window                
     def open_overlay(self):
         self.gui_overlay = tk.Toplevel()
@@ -330,12 +377,9 @@ class ConstructionHelper():
         return self.gui_frame
 
     def remove_sites(self,ButtonPress):
-        #print("remove:",type(ButtonPress))
         removeText = "Remove the following site(s)?\n"        
         for idx in self.gui_listbox.curselection():
             removeText += "- "+self.listbox_stations[idx]+"\n"
-            print("selected site:",self.listbox_stations[idx])        
-        print("")
         result = mbox.askokcancel("Remove Sites", removeText,icon=mbox.WARNING)
         if result:
             for idx in self.gui_listbox.curselection():
@@ -354,7 +398,12 @@ class ConstructionHelper():
             else:
                 self.gui_listbox.configure(background='white')
         self.theme = theme.active
+        if self.show_economy:
+            self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
+        else:
+            self.gui_economies.grid_remove()
 
+            
 #---------- update the display
     def update_listbox(self,clear=False):
         # if we don't know of any construction projects then clear out the listbox and display
@@ -464,5 +513,28 @@ class ConstructionHelper():
                     if (entry['event'] == 'ColonisationConstructionDepot'):                        
                         self.gui_frame.after(10, lambda: self.UpdateGoods(entry,System="Unknown System",
                                                                           StationName="Unknown Station"));
-                        time.sleep(0.1)
-                        
+                        time.sleep(0.1) # give the main thread time and I like how this makes it look
+
+    def do_ftp_store(self):
+        #print('do_ftp_store called in:',threading.current_thread().name)
+        storage_string = self.get_storage_string()
+        file_obj = BytesIO(storage_string.encode('utf-8'))
+        with FTP(self.ftp_server) as ftp:
+            ftp.login(user=self.ftp_user, passwd=self.ftp_password)
+            ftp.storbinary(f"STOR {self.ftp_filepath}", file_obj)
+        #print("file stored on ftp")
+        self.last_ftp_upload = datetime.now()
+
+    def ftp_store(self):
+        #ToDo: Check when last transfer was (and that we have recent data)
+        if (self.worker_thread and self.worker_thread.is_alive()):
+            #print("Worker Thread still busy.")
+            return
+        if self.worker_thread:
+            self.worker_thread.join();
+        if (self.do_ftp_storage and self.ftp_server and
+            self.ftp_user and self.ftp_password and self.ftp_filepath):
+            # we have all required data and are asked to do it
+            self.worker_thread = threading.Thread(target=self.do_ftp_store, name="Worker")
+            self.worker_thread.start()
+

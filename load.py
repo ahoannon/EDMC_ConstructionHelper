@@ -27,7 +27,9 @@ def journal_entry(cmdr, is_beta, system, station, entry, state):
         ConstHelper.UpdateGoods(entry,System=system,StationName=station);
     if ((entry['event'] == 'Location') or (entry['event'] == 'Docked')):
         ConstHelper.UpdateStations(entry);
-        
+    if (entry['event'] == 'ColonisationContribution'):
+        ConstHelper.ContributionHandler(entry);
+       
 def plugin_app(parent):
     global ConstHelper;
     return ConstHelper.init_gui(parent)
