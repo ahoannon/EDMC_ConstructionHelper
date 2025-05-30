@@ -106,6 +106,7 @@ class ConstructionHelper():
         self.last_ftp_upload = datetime(2025, 5, 26)
         self.last_ftp_download = datetime(2025, 5, 26)
         self.worker_thread = False
+        self.worker_event = threading.Event()
         self.get_config()
         self.set_config()
 
@@ -200,14 +201,14 @@ class ConstructionHelper():
         return Name
 
 #---------- handle the resources and economy events
-    def UpdateGoods(self,entry,System="",StationName=""):
+    def UpdateGoods(self,entry,System="Unknown System",StationName="Unknown Station"):
         #print("UpdateGoods called from:",threading.current_thread().name);
         # ignore older events
         newtime = datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ") 
         timediff = datetime.now() - newtime
         if ( (timediff.total_seconds() > self.storage_timeout)  or
              (entry['MarketID'] in self.DepotEventTimestamps and
-              newtime <=  self.DepotEventTimestamps[entry['MarketID']])):
+              newtime <=  self.DepotEventTimestamps[entry['MarketID']] )):
             print("Ignored one event")
             return
         # process the entry
@@ -246,7 +247,9 @@ class ConstructionHelper():
                 self.DepotEventTimestamps[entry['MarketID']] = newtime
                 self.DepotEvents[entry['MarketID']] = entry
                 self.update_listbox()
-                self.update_values()                
+                self.update_values()
+        #signal the worker that we are done (if needed)
+        self.worker_event.set()
 
     def UpdateEconomy(self,entry):
         """
@@ -306,11 +309,12 @@ class ConstructionHelper():
         if self.do_ftp_storage:
             tdiff = datetime.now() - self.last_ftp_download
             if (tdiff.total_seconds() > self.ftp_download_delay):
-               if ((entry['StationType'] == "SpaceConstructionDepot") or
-                   (entry['StationType'] == "PlanetaryConstructionDepot") or
-                   (entry['StationName'].split(';')[0] == '$EXT_PANEL_ColonisationShip')):
-                   return
-               self.ftp_get()
+                if ('StationType' in entry and
+                    ((entry['StationType'] == "SpaceConstructionDepot") or
+                     (entry['StationType'] == "PlanetaryConstructionDepot") or
+                     (entry['StationName'].split(';')[0] == '$EXT_PANEL_ColonisationShip'))):
+                    return
+                self.ftp_get()
 
                
 #---------- open and close the overlay window                
@@ -533,10 +537,11 @@ class ConstructionHelper():
                                 self.SiteNames[marketID]['StationName'] = station
                                 self.SiteNames[marketID]['System'] = system
                                 self.SiteNames[marketID]['Name'] = entry['StationNames'][index]
-                    if (entry['event'] == 'ColonisationConstructionDepot'):                        
-                        self.gui_frame.after(10, lambda: self.UpdateGoods(entry,System="Unknown System",
-                                                                          StationName="Unknown Station"));
-                        time.sleep(0.1) # give the main thread time and I like how this makes it look
+                    if (entry['event'] == 'ColonisationConstructionDepot'):
+                        self.worker_event.clear()
+                        self.gui_frame.after(10, lambda: self.UpdateGoods(entry));
+                        self.worker_event.wait() #wait for the main thread to be done with processing
+                        time.sleep(0.1) # I like how this makes it look
 
     def do_ftp_store(self):
         #print('do_ftp_store called in:',threading.current_thread().name)
@@ -589,9 +594,10 @@ class ConstructionHelper():
                         self.SiteNames[marketID]['Name'] = entry['StationNames'][index]
             if (entry['event'] == 'ColonisationConstructionDepot'):
                 pseudoname = "MarketID:"+str(entry['MarketID'])
+                self.worker_event.clear()
                 self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
                                                                   StationName=pseudoname));
-                time.sleep(0.01) # don't hammer the main thread
+                self.worker_event.wait() #wait for the main thread to be done with processing
         self.last_ftp_download = datetime.now()
 
     def ftp_get(self):
