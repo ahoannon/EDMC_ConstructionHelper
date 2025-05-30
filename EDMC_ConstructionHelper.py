@@ -80,6 +80,9 @@ class ConstructionHelper():
         self.ftp_upload_delay = 120
         # minimum time between ftp downloads
         self.ftp_download_delay = 60
+        # don't send data entries for non-tracked sites that are older than this (in seconds)
+        self.untracked_timeout = 43200 # 12 hours
+
         
         # maximum height of the site selection listbox
         self.config_listboxHeight = 4
@@ -92,7 +95,7 @@ class ConstructionHelper():
         # -------- Internal data structures --------
         self.SiteNames = {}
         self.GoodsRequired = {}
-        self.GoodsTimestamp = {}
+        self.DepotEventTimestamps = {}
         self.DepotEvents = {}
         self.goods_string = tk.StringVar()
         self.values_string = tk.StringVar()
@@ -203,11 +206,12 @@ class ConstructionHelper():
         newtime = datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ") 
         timediff = datetime.now() - newtime
         if ( (timediff.total_seconds() > self.storage_timeout)  or
-             (entry['MarketID'] in self.GoodsTimestamp and
-              newtime <=  self.GoodsTimestamp[entry['MarketID']])):
+             (entry['MarketID'] in self.DepotEventTimestamps and
+              newtime <=  self.DepotEventTimestamps[entry['MarketID']])):
             print("Ignored one event")
             return
-        # process the event
+        # process the entry
+        # ToDo: store entries that the user manually de-selected 
         if (entry['ConstructionComplete'] == False and
             entry['ConstructionFailed'] == False):
             current = {}
@@ -222,7 +226,7 @@ class ConstructionHelper():
                 self.GoodsRequired[entry['MarketID']] != current ):
                 # Goods required new or updated
                 self.GoodsRequired[entry['MarketID']] = current
-                self.GoodsTimestamp[entry['MarketID']] = newtime
+                self.DepotEventTimestamps[entry['MarketID']] = newtime
                 self.DepotEvents[entry['MarketID']] = entry
                 if entry['MarketID'] not in self.SiteNames:
                     self.SiteNames[entry['MarketID']] = {}
@@ -239,8 +243,10 @@ class ConstructionHelper():
         else: #Construction is either complete or has failed
             if entry['MarketID'] in self.GoodsRequired:
                 self.GoodsRequired.pop(entry['MarketID'])
+                self.DepotEventTimestamps[entry['MarketID']] = newtime
+                self.DepotEvents[entry['MarketID']] = entry
                 self.update_listbox()
-                self.update_values()
+                self.update_values()                
 
     def UpdateEconomy(self,entry):
         """
@@ -475,15 +481,20 @@ class ConstructionHelper():
 
 #---------- handle storage of data
 
-    def get_storage_string(self):
+    def get_storage_string(self, for_storage = True):
         #start with a "StationNames" pseudo event
+        #  store on the names of the sites we actually track
         namesdict = {"event":"StationNames" ,
                      "Station_IDs":self.listbox_IDs,
                      "StationNames":self.listbox_stations}
-        outstring = json.dumps(namesdict)+'\n'        
-        for marketID in self.listbox_IDs:
-            timediff = datetime.now() - self.GoodsTimestamp[marketID]
-            if timediff.total_seconds() < self.storage_timeout:
+        outstring = json.dumps(namesdict)+'\n'                
+        for marketID in self.DepotEvents.keys():
+            timediff = datetime.now() - self.DepotEventTimestamps[marketID]
+            if ((marketID in self.listbox_IDs) and
+                (timediff.total_seconds() < self.storage_timeout)):
+                outstring += json.dumps(self.DepotEvents[marketID])+'\n'
+            elif ((not for_storage) and (timediff.total_seconds() < self.self.untracked_timeout)):
+                #untracked sites get stored without a proper name
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'
             else:
                 print('Market',marketID,'timed out.')
@@ -529,7 +540,13 @@ class ConstructionHelper():
 
     def do_ftp_store(self):
         #print('do_ftp_store called in:',threading.current_thread().name)
-        storage_string = self.get_storage_string()
+        #check if our ftp-data is recent
+        tdiff = datetime.now() - self.last_ftp_download
+        if tdiff.total_seconds() > 600:
+            #can do it from here as we are the worker!
+            self.do_ftp_get()
+            time.sleep(2)
+        storage_string = self.get_storage_string(for_storage=False)
         file_obj = BytesIO(storage_string.encode('utf-8'))
         with FTP(self.ftp_server) as ftp:
             ftp.login(user=self.ftp_user, passwd=self.ftp_password)
@@ -538,7 +555,9 @@ class ConstructionHelper():
         self.last_ftp_upload = datetime.now()
 
     def ftp_store(self):
-        #ToDo: Check when last transfer was (and that we have recent data)
+        #ToDo:
+        # - Send only data from last hour or so
+        # - Make sure we got ftp data before sending data
         if (self.worker_thread and self.worker_thread.is_alive()):
             #print("Worker Thread still busy.")
             return
@@ -551,7 +570,7 @@ class ConstructionHelper():
             self.worker_thread.start()
 
     def do_ftp_get(self):
-        print('do_ftp_get called in:',threading.current_thread().name)
+        #print('do_ftp_get called in:',threading.current_thread().name)
         file_obj = BytesIO()
         with FTP(self.ftp_server) as ftp:
             ftp.login(user=self.ftp_user, passwd=self.ftp_password)
@@ -568,9 +587,10 @@ class ConstructionHelper():
                         self.SiteNames[marketID]['StationName'] = station
                         self.SiteNames[marketID]['System'] = system
                         self.SiteNames[marketID]['Name'] = entry['StationNames'][index]
-            if (entry['event'] == 'ColonisationConstructionDepot'):                        
+            if (entry['event'] == 'ColonisationConstructionDepot'):
+                pseudoname = "MarketID:"+str(entry['MarketID'])
                 self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
-                                                                  StationName="Unknown Station"));
+                                                                  StationName=pseudoname));
                 time.sleep(0.01) # don't hammer the main thread
         self.last_ftp_download = datetime.now()
 
