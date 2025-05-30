@@ -9,7 +9,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
 from tkinter import messagebox as mbox
-from ftplib import FTP
+import ftplib
 from io import BytesIO
 # ---- EDMC logger setup ----
 import logging
@@ -553,16 +553,13 @@ class ConstructionHelper():
             time.sleep(2)
         storage_string = self.get_storage_string(for_storage=False)
         file_obj = BytesIO(storage_string.encode('utf-8'))
-        with FTP(self.ftp_server) as ftp:
+        with ftplib.FTP(self.ftp_server) as ftp:
             ftp.login(user=self.ftp_user, passwd=self.ftp_password)
             ftp.storbinary(f"STOR {self.ftp_filepath}", file_obj)
         #print("file stored on ftp")
         self.last_ftp_upload = datetime.now()
 
     def ftp_store(self):
-        #ToDo:
-        # - Send only data from last hour or so
-        # - Make sure we got ftp data before sending data
         if (self.worker_thread and self.worker_thread.is_alive()):
             #print("Worker Thread still busy.")
             return
@@ -576,28 +573,32 @@ class ConstructionHelper():
 
     def do_ftp_get(self):
         #print('do_ftp_get called in:',threading.current_thread().name)
-        file_obj = BytesIO()
-        with FTP(self.ftp_server) as ftp:
-            ftp.login(user=self.ftp_user, passwd=self.ftp_password)
-            ftp.retrbinary(f"RETR {self.ftp_filepath}", file_obj.write)
-        file_obj.seek(0)
-        for line in file_obj:
-            entry = json.loads(line)
-            if (entry['event'] == 'StationNames'):
-                for index in range(len(entry['Station_IDs'])):
-                    marketID = entry['Station_IDs'][index]
-                    if marketID not in self.SiteNames:
-                        system,station = entry['StationNames'][index].split(':')
-                        self.SiteNames[marketID] = {}
-                        self.SiteNames[marketID]['StationName'] = station
-                        self.SiteNames[marketID]['System'] = system
-                        self.SiteNames[marketID]['Name'] = entry['StationNames'][index]
-            if (entry['event'] == 'ColonisationConstructionDepot'):
-                pseudoname = "MarketID:"+str(entry['MarketID'])
-                self.worker_event.clear()
-                self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
-                                                                  StationName=pseudoname));
-                self.worker_event.wait() #wait for the main thread to be done with processing
+        try:
+            file_obj = BytesIO()
+            with ftplib.FTP(self.ftp_server) as ftp:
+                ftp.login(user=self.ftp_user, passwd=self.ftp_password)
+                ftp.retrbinary(f"RETR {self.ftp_filepath}", file_obj.write)
+            file_obj.seek(0)
+            for line in file_obj:
+                entry = json.loads(line)
+                if (entry['event'] == 'StationNames'):
+                    for index in range(len(entry['Station_IDs'])):
+                        marketID = entry['Station_IDs'][index]
+                        if marketID not in self.SiteNames:
+                            system,station = entry['StationNames'][index].split(':')
+                            self.SiteNames[marketID] = {}
+                            self.SiteNames[marketID]['StationName'] = station
+                            self.SiteNames[marketID]['System'] = system
+                            self.SiteNames[marketID]['Name'] = entry['StationNames'][index]
+                if (entry['event'] == 'ColonisationConstructionDepot'):
+                    pseudoname = "MarketID:"+str(entry['MarketID'])
+                    self.worker_event.clear()
+                    self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
+                                                                      StationName=pseudoname));
+                    self.worker_event.wait() #wait for the main thread to be done with processing
+        except ftplib.error_perm:
+            print('Failed to retrieve file')
+            pass
         self.last_ftp_download = datetime.now()
 
     def ftp_get(self):
