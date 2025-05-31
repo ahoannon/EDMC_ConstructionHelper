@@ -497,11 +497,12 @@ class ConstructionHelper():
             if ((marketID in self.listbox_IDs) and
                 (timediff.total_seconds() < self.storage_timeout)):
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'
-            elif ((not for_storage) and (timediff.total_seconds() < self.self.untracked_timeout)):
+            elif ((not for_storage) and (timediff.total_seconds() < self.untracked_timeout)):
                 #untracked sites get stored without a proper name
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'
             else:
-                print('Market',marketID,'timed out.')
+                if not for_storage: print('Market',marketID,'timed out.')
+                pass
         return outstring
 
     def data_to_file(self, filepath):

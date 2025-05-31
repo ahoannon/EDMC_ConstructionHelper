@@ -67,10 +67,12 @@ class CH_Preferences():
     def prefs_ui(self, parent: nb.Notebook):
         frame = nb.Frame(parent)
         frame.grid(sticky=tk.EW)
+        frame.grid_columnconfigure(0, weight=1)
         frame_overlay = nb.Frame(frame)
-        frame_overlay.grid(row=0, column=0)
-        nb.Label(frame_overlay, text="Settings for the overlay window. "
-                 "Close and re-open the overlay for settings to take effect.").grid(row=0, column=0, columnspan=4)
+        frame_overlay.grid(row=0, column=0, sticky=tk.W, padx=4)
+        self.OV_label = nb.Label(frame_overlay, text="Settings for the overlay window. "
+                                 "Close and re-open the overlay for settings to take effect.")
+        self.OV_label.grid(row=0, column=0, columnspan=4, sticky=tk.W, pady=(5,0))
         self.create_label_entry(frame_overlay, "X-Position (pixels to the right of top left corner):", "overlayX", 0, 1 )
         self.create_label_entry(frame_overlay, "Y-Position (pixels down from top left corner):", "overlayY", 0, 2 )
         self.create_label_entry(frame_overlay, "Font Size (character height in pixels, 0=default):", "fontSize", 0, 3 )
@@ -78,28 +80,28 @@ class CH_Preferences():
         self.create_label_entry(frame_overlay, "Background Color (TK color string):", "overlayBG", 0, 5)
         self.create_label_entry(frame_overlay, "Transparency (1 invisible - 100 opaque):", "Alpha", 0, 6)
         # general stuff
-        ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=1, columnspan=4, padx=2, pady=(15,5), sticky=tk.EW)
+        ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=1, columnspan=4, padx=2, pady=(5,5), sticky=tk.EW)
         self.ShowEcon_var = tk.IntVar()
-        self.show_economy__button = nb.Checkbutton(frame, text="Show economy composition of last station",
+        self.show_economy__button = nb.Checkbutton(frame, text="Show economy composition of last station you docked to",
                                                   variable=self.ShowEcon_var)
-        self.show_economy__button.grid(row=2, column=0, sticky=tk.W)
+        self.show_economy__button.grid(row=2, column=0, sticky=tk.W, padx=4)
         self.ShowEcon_var.set(config.get_bool(self.Prefix+"ShowEconomy"))
         # Start of file storage stuff
-        ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=3, columnspan=4, padx=2, pady=(15,5), sticky=tk.EW)
+        ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=3, columnspan=4, padx=2, pady=(5,5), sticky=tk.EW)
         frame_file = nb.Frame(frame)
-        frame_file.grid(row=4, column=0)
+        frame_file.grid(row=4, column=0, sticky=tk.W, padx=4)
         self.DoFile_var = tk.IntVar()
-        self.file_storage_button = nb.Checkbutton(frame_file, text="Store construction data to file", variable=self.DoFile_var,
+        self.file_storage_button = nb.Checkbutton(frame_file, text="Store construction data to local file", variable=self.DoFile_var,
                                                   command=self.toggle_file_entry)
         self.file_storage_button.grid(row=0, column=0, columnspan=2, sticky=tk.W)
-        self.create_label_entry(frame_file, "Storage file incl. path:", "storage_file", 0, 1)
+        self.create_label_entry(frame_file, "Storage file (incl. path):", "storage_file", 0, 1)
         self.storage_file_entry.config(width=60)
         self.DoFile_var.set(config.get_bool(self.Prefix+"DoFile"))
         self.toggle_file_entry()
         # start of ftp storage stuff
-        ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=5, columnspan=4, padx=2, pady=(15,5), sticky=tk.EW)
+        ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=5, columnspan=4, padx=2, pady=(5,5), sticky=tk.EW)
         frame_ftp = nb.Frame(frame)
-        frame_ftp.grid(row=6, column=0, sticky=tk.EW)
+        frame_ftp.grid(row=6, column=0, sticky=tk.W, padx=4)
         self.DoFTP_var = tk.IntVar()
         self.ftp_storage_button = nb.Checkbutton(frame_ftp, text="Store data on a remote ftp server", variable=self.DoFTP_var,
                                                   command=self.toggle_ftp_entry)
