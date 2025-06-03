@@ -554,9 +554,14 @@ class ConstructionHelper():
             time.sleep(2)
         storage_string = self.get_storage_string(for_storage=False)
         file_obj = BytesIO(storage_string.encode('utf-8'))
-        with ftplib.FTP(self.ftp_server) as ftp:
-            ftp.login(user=self.ftp_user, passwd=self.ftp_password)
-            ftp.storbinary(f"STOR {self.ftp_filepath}", file_obj)
+        try:
+            with ftplib.FTP(self.ftp_server) as ftp:
+                ftp.login(user=self.ftp_user, passwd=self.ftp_password)
+                ftp.storbinary(f"STOR {self.ftp_filepath}", file_obj)
+        except ftplib.error_perm as excep :
+            print('Failed to store file to server: '+str(excep))
+        except Exception as excep:
+            print('Error while storing file: '+str(excep))
         #print("file stored on ftp")
         self.last_ftp_upload = datetime.now()
 
@@ -597,10 +602,12 @@ class ConstructionHelper():
                     self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
                                                                       StationName=pseudoname));
                     self.worker_event.wait() #wait for the main thread to be done with processing
-        except ftplib.error_perm:
-            print('Failed to retrieve file')
-            pass
+        except ftplib.error_perm as excep :
+            print('Failed to retrieve file from server: '+str(excep))
+        except Exception as excep:
+            print('Error while retrieving file: '+str(excep))
         self.last_ftp_download = datetime.now()
+
 
     def ftp_get(self):
         if (self.worker_thread and self.worker_thread.is_alive()):
