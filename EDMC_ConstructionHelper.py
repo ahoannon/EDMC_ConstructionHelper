@@ -392,7 +392,7 @@ class ConstructionHelper():
         self.update_listbox()
         self.update_values()
         # This is the very first time we start the worker, so don't need to check him
-        self.worker_thread = threading.Thread(target=self.read_data, name="Worker")
+        self.worker_thread = threading.Thread(target=self.startup_data_retrieval, name="Worker")
         self.worker_thread.start()
         if theme:
             self.theme = theme.active
@@ -484,6 +484,10 @@ class ConstructionHelper():
             self.values_string.set(values[:-1])
 
 #---------- handle storage of data
+
+    def startup_data_retrieval(self):
+        self.read_data()
+        self.do_ftp_get()
 
     def get_storage_string(self, for_storage = True):
         #start with a "StationNames" pseudo event
