@@ -210,6 +210,7 @@ class ConstructionHelper():
              (entry['MarketID'] in self.DepotEventTimestamps and
               newtime <=  self.DepotEventTimestamps[entry['MarketID']] )):
             #print("Ignored one event")
+            self.worker_event.set()
             return
         # process the entry
         # ToDo: store entries that the user manually de-selected 
@@ -487,6 +488,7 @@ class ConstructionHelper():
 
     def startup_data_retrieval(self):
         self.read_data()
+        time.sleep(0.5)
         self.do_ftp_get()
 
     def get_storage_string(self, for_storage = True):
@@ -601,7 +603,7 @@ class ConstructionHelper():
                             self.SiteNames[marketID]['System'] = system
                             self.SiteNames[marketID]['Name'] = entry['StationNames'][index]
                 if (entry['event'] == 'ColonisationConstructionDepot'):
-                    pseudoname = "MarketID:"+str(entry['MarketID'])
+                    pseudoname = "MarketID "+str(entry['MarketID'])
                     self.worker_event.clear()
                     self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
                                                                       StationName=pseudoname));
@@ -611,6 +613,7 @@ class ConstructionHelper():
         except Exception as excep:
             print('Error while retrieving file: '+str(excep))
         self.last_ftp_download = datetime.now()
+        #print('file retrieved from ftp')
 
 
     def ftp_get(self):
