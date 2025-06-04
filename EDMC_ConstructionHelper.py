@@ -212,6 +212,10 @@ class ConstructionHelper():
             #print("Ignored one event")
             self.worker_event.set()
             return
+        # do a ftp-store if this is new and we aren't called from the worker
+        if ((entry['MarketID'] not in self.GoodsRequired) and
+            not (self.worker_thread and self.worker_thread.is_alive())):
+            self.initiate_ftp_send()
         # process the entry
         # ToDo: store entries that the user manually de-selected 
         if (entry['ConstructionComplete'] == False and
@@ -241,7 +245,7 @@ class ConstructionHelper():
                     idx = self.listbox_IDs.index(entry['MarketID'])
                     self.gui_listbox.selection_set(idx)
                 self.update_values()
-                self.safe_data()
+                self.save_data()
         else: #Construction is either complete or has failed
             if entry['MarketID'] in self.GoodsRequired:
                 self.GoodsRequired.pop(entry['MarketID'])
@@ -409,7 +413,7 @@ class ConstructionHelper():
                 self.GoodsRequired.pop(self.listbox_IDs[idx])
             self.update_listbox()
             self.update_values()
-            self.safe_data()
+            self.save_data()
         pass
     
     def fix_theme(self):
@@ -517,7 +521,7 @@ class ConstructionHelper():
             filehandle.write(self.get_storage_string())
         return
         
-    def safe_data(self):
+    def save_data(self):
         if (self.worker_thread and self.worker_thread.is_alive()):
             #print("Worker Thread still busy.")
             return
@@ -554,10 +558,10 @@ class ConstructionHelper():
         #print('do_ftp_store called in:',threading.current_thread().name)
         #check if our ftp-data is recent
         tdiff = datetime.now() - self.last_ftp_download
-        if tdiff.total_seconds() > 600:
+        if tdiff.total_seconds() > self.ftp_download_delay:
             #can do it from here as we are the worker!
             self.do_ftp_get()
-            time.sleep(2)
+            time.sleep(0.5)
         storage_string = self.get_storage_string(for_storage=False)
         file_obj = BytesIO(storage_string.encode('utf-8'))
         try:
