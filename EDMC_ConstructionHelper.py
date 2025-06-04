@@ -101,6 +101,8 @@ class ConstructionHelper():
         self.values_string = tk.StringVar()
         self.listbox_items = tk.StringVar()
         self.station_economy = tk.StringVar()
+        self.ftp_status = ""
+        self.ftp_status_var = tk.StringVar()
         self.listbox_IDs = []
         self.listbox_stations = []
         self.last_ftp_upload = datetime(2025, 5, 26)
@@ -393,6 +395,10 @@ class ConstructionHelper():
         self.gui_economies = tk.Label(self.gui_frame, textvariable=self.station_economy,
                                       justify=tk.LEFT )
         self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
+        self.gui_ftp_status = tk.Label(self.gui_frame, textvariable=self.ftp_status_var,
+                                       justify=tk.LEFT )
+        self.gui_ftp_status.grid_remove()
+        #self.gui_ftp_status.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
         
         self.update_listbox()
         self.update_values()
@@ -430,6 +436,12 @@ class ConstructionHelper():
         else:
             self.gui_economies.grid_remove()
 
+    def update_ftp_status(self):
+        if self.ftp_status:
+            self.ftp_status_var.set(self.ftp_status)
+            self.gui_ftp_status.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
+        else:
+            self.gui_ftp_status.grid_remove()
             
 #---------- update the display
     def update_listbox(self,clear=False):
@@ -557,6 +569,8 @@ class ConstructionHelper():
     def do_ftp_store(self):
         #print('do_ftp_store called in:',threading.current_thread().name)
         #check if our ftp-data is recent
+        self.ftp_status = ""
+        self.ftp_status =  'do_ftp_store called in:\n '+threading.current_thread().name
         tdiff = datetime.now() - self.last_ftp_download
         if tdiff.total_seconds() > self.ftp_download_delay:
             #can do it from here as we are the worker!
@@ -570,10 +584,13 @@ class ConstructionHelper():
                 ftp.storbinary(f"STOR {self.ftp_filepath}", file_obj)
         except ftplib.error_perm as excep :
             print('Failed to store file to server: '+str(excep))
+            self.ftp_status = 'Failed to store file to server:\n '+str(excep)
         except Exception as excep:
             print('Error while storing file: '+str(excep))
+            self.ftp_status = 'Error while storing file:\n '+str(excep)
         #print("file stored on ftp")
         self.last_ftp_upload = datetime.now()
+        self.gui_frame.after(10, self.update_ftp_status)
 
     def ftp_store(self):
         if (self.worker_thread and self.worker_thread.is_alive()):
@@ -589,6 +606,7 @@ class ConstructionHelper():
 
     def do_ftp_get(self):
         #print('do_ftp_get called in:',threading.current_thread().name)
+        self.ftp_status = ""
         try:
             file_obj = BytesIO()
             with ftplib.FTP(self.ftp_server) as ftp:
@@ -614,11 +632,13 @@ class ConstructionHelper():
                     self.worker_event.wait() #wait for the main thread to be done with processing
         except ftplib.error_perm as excep :
             print('Failed to retrieve file from server: '+str(excep))
+            self.ftp_status = 'Failed to retrieve file from server:\n '+str(excep)
         except Exception as excep:
             print('Error while retrieving file: '+str(excep))
+            self.ftp_status = 'Error while retrieving file:\n '+str(excep)
         self.last_ftp_download = datetime.now()
         #print('file retrieved from ftp')
-
+        self.gui_frame.after(10, self.update_ftp_status)
 
     def ftp_get(self):
         if (self.worker_thread and self.worker_thread.is_alive()):
