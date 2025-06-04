@@ -513,6 +513,11 @@ class ConstructionHelper():
         namesdict = {"event":"StationNames" ,
                      "Station_IDs":self.listbox_IDs,
                      "StationNames":self.listbox_stations}
+        if not for_storage:
+            for marketID in self.DepotEvents.keys():
+                if marketID not in namesdict["Station_IDs"]:
+                     namesdict["Station_IDs"].append(marketID)
+                     namesdict["StationNames"].append(self.SiteNames[marketID]['Name'])
         outstring = json.dumps(namesdict)+'\n'                
         for marketID in self.DepotEvents.keys():
             timediff = datetime.now() - self.DepotEventTimestamps[marketID]
@@ -570,7 +575,6 @@ class ConstructionHelper():
         #print('do_ftp_store called in:',threading.current_thread().name)
         #check if our ftp-data is recent
         self.ftp_status = ""
-        self.ftp_status =  'do_ftp_store called in:\n '+threading.current_thread().name
         tdiff = datetime.now() - self.last_ftp_download
         if tdiff.total_seconds() > self.ftp_download_delay:
             #can do it from here as we are the worker!
