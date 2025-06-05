@@ -383,7 +383,7 @@ class ConstructionHelper():
                                    justify=tk.LEFT)
         self.gui_goods.grid(column=0,row=1,sticky=(tk.E))
         self.gui_values.grid(column=1,row=1,sticky=(tk.W))
-
+        
         self.gui_button_open = tk.Button(self.gui_frame,text="Open overlay",
                                           command=self.open_overlay)
         self.gui_button_open.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
@@ -397,6 +397,10 @@ class ConstructionHelper():
         self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
         self.gui_ftp_status = tk.Label(self.gui_frame, textvariable=self.ftp_status_var,
                                        justify=tk.LEFT )
+        fontObj = tkFont.Font(self.gui_ftp_status,self.gui_ftp_status.cget("font"))
+        fontObj.configure(weight="bold")
+        self.gui_ftp_status.configure(font=fontObj)
+
         self.gui_ftp_status.grid_remove()
         #self.gui_ftp_status.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
         
@@ -435,6 +439,8 @@ class ConstructionHelper():
             self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
         else:
             self.gui_economies.grid_remove()
+        self.ftp_status = ""
+        self.update_ftp_status()
 
     def update_ftp_status(self):
         if self.ftp_status:
