@@ -142,10 +142,15 @@ class ConstructionHelper():
                 if config.get_str(self.Prefix+"FTPPasswd"):
                     self.ftp_password = config.get_str(self.Prefix+"FTPPasswd")
                 if config.get_str(self.Prefix+"FTPFilePath"):
-                    self.ftp_filepath = config.get_str(self.Prefix+"FTPFilePath")
-                
+                    self.ftp_filepath = config.get_str(self.Prefix+"FTPFilePath")                
             except ValueError:
                 pass
+            if (self.do_ftp_storage and not (self.ftp_server and self.ftp_user and
+                                             self.ftp_password and self.ftp_filepath)):
+                print("FTP storage needs server, username, password, AND filename! \n"
+                      " Deactivating FTP storage")
+                self.do_ftp_storage = False
+
             
     def set_config(self):
         if config:
@@ -509,9 +514,12 @@ class ConstructionHelper():
 #---------- handle storage of data
 
     def startup_data_retrieval(self):
-        self.read_data()
-        time.sleep(0.5)
-        self.do_ftp_get()
+        if self.do_file_storage:
+            self.read_data()
+        if (self.do_ftp_storage and self.ftp_server and
+            self.ftp_user and self.ftp_password and self.ftp_filepath):
+            time.sleep(0.5)
+            self.do_ftp_get()
 
     def get_storage_string(self, for_storage = True):
         #start with a "StationNames" pseudo event
@@ -580,6 +588,11 @@ class ConstructionHelper():
     def do_ftp_store(self):
         #print('do_ftp_store called in:',threading.current_thread().name)
         #check if our ftp-data is recent
+        if  not (self.ftp_server and self.ftp_user and
+                 self.ftp_password and self.ftp_filepath):
+            self.ftp_status = 'Error while storing file:\n Need server, username, password, AND filename!'
+            self.gui_frame.after(10, self.update_ftp_status)
+            return
         self.ftp_status = ""
         tdiff = datetime.now() - self.last_ftp_download
         if tdiff.total_seconds() > self.ftp_download_delay:
@@ -593,10 +606,10 @@ class ConstructionHelper():
                 ftp.login(user=self.ftp_user, passwd=self.ftp_password)
                 ftp.storbinary(f"STOR {self.ftp_filepath}", file_obj)
         except ftplib.error_perm as excep :
-            print('Failed to store file to server: '+str(excep))
+            print('Failed to store file to server: '+repr(excep))
             self.ftp_status = 'Failed to store file to server:\n '+str(excep)
         except Exception as excep:
-            print('Error while storing file: '+str(excep))
+            print('Error while storing file: '+repr(excep))
             self.ftp_status = 'Error while storing file:\n '+str(excep)
         #print("file stored on ftp")
         self.last_ftp_upload = datetime.now()
@@ -616,7 +629,12 @@ class ConstructionHelper():
 
     def do_ftp_get(self):
         #print('do_ftp_get called in:',threading.current_thread().name)
-        self.ftp_status = ""
+        if  not (self.ftp_server and self.ftp_user and
+                 self.ftp_password and self.ftp_filepath):
+            self.ftp_status = 'Error while retrieving file:\n Need server, username, password, AND filename!'
+            self.gui_frame.after(10, self.update_ftp_status)
+            return
+        self.ftp_status = ""        
         try:
             file_obj = BytesIO()
             with ftplib.FTP(self.ftp_server) as ftp:
@@ -641,10 +659,10 @@ class ConstructionHelper():
                                                                       StationName=pseudoname));
                     self.worker_event.wait() #wait for the main thread to be done with processing
         except ftplib.error_perm as excep :
-            print('Failed to retrieve file from server: '+str(excep))
+            print('Failed to retrieve file from server: '+repr(excep))
             self.ftp_status = 'Failed to retrieve file from server:\n '+str(excep)
         except Exception as excep:
-            print('Error while retrieving file: '+str(excep))
+            print('Error while retrieving file: '+repr(excep))
             self.ftp_status = 'Error while retrieving file:\n '+str(excep)
         self.last_ftp_download = datetime.now()
         #print('file retrieved from ftp')
