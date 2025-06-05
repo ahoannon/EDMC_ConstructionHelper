@@ -515,6 +515,7 @@ class ConstructionHelper():
 
     def startup_data_retrieval(self):
         if self.do_file_storage:
+            time.sleep(0.1)
             self.read_data()
         if (self.do_ftp_storage and self.ftp_server and
             self.ftp_user and self.ftp_password and self.ftp_filepath):
