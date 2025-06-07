@@ -522,13 +522,13 @@ class ConstructionHelper():
             time.sleep(0.5)
             self.do_ftp_get()
 
-    def get_storage_string(self, for_storage = True):
+    def get_storage_string(self, local_storage = True):
         #start with a "StationNames" pseudo event
         #  store on the names of the sites we actually track
         namesdict = {"event":"StationNames" ,
                      "Station_IDs":self.listbox_IDs,
                      "StationNames":self.listbox_stations}
-        if not for_storage:
+        if not local_storage:
             for marketID in self.DepotEvents.keys():
                 if marketID not in namesdict["Station_IDs"]:
                      namesdict["Station_IDs"].append(marketID)
@@ -539,11 +539,16 @@ class ConstructionHelper():
             if ((marketID in self.listbox_IDs) and
                 (timediff.total_seconds() < self.storage_timeout)):
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'
-            elif ((not for_storage) and (timediff.total_seconds() < self.untracked_timeout)):
-                #untracked sites get stored without a proper name
+            elif ((not local_storage) and (timediff.total_seconds() < self.storage_timeout) and
+                  (self.DepotEvents[marketID]['ConstructionComplete'] or
+                   self.DepotEvents[marketID]['ConstructionFailed'])):
+                #untracked but finished sites get stored with long timeout
+                outstring += json.dumps(self.DepotEvents[marketID])+'\n'
+            elif ((not local_storage) and (timediff.total_seconds() < self.untracked_timeout)):
+                #untracked and unfinished sites time out faster
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'
             else:
-                #if not for_storage: print('Market',marketID,'timed out.')
+                #if not local_storage: print('Market',marketID,'timed out.')
                 pass
         return outstring
 
@@ -600,7 +605,7 @@ class ConstructionHelper():
             #can do it from here as we are the worker!
             self.do_ftp_get()
             time.sleep(0.5)
-        storage_string = self.get_storage_string(for_storage=False)
+        storage_string = self.get_storage_string(local_storage=False)
         file_obj = BytesIO(storage_string.encode('utf-8'))
         try:
             with ftplib.FTP(self.ftp_server) as ftp:
