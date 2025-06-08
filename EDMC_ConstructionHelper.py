@@ -526,14 +526,14 @@ class ConstructionHelper():
         #start with a "StationNames" pseudo event
         #  store on the names of the sites we actually track
         namesdict = {"event":"StationNames" ,
-                     "Station_IDs":self.listbox_IDs,
-                     "StationNames":self.listbox_stations}
+                     "Station_IDs":self.listbox_IDs.copy(),
+                     "StationNames":self.listbox_stations.copy()}
         if not local_storage:
             for marketID in self.DepotEvents.keys():
                 if marketID not in namesdict["Station_IDs"]:
                      namesdict["Station_IDs"].append(marketID)
                      namesdict["StationNames"].append(self.SiteNames[marketID]['Name'])
-        outstring = json.dumps(namesdict)+'\n'                
+        outstring = json.dumps(namesdict)+'\n'
         for marketID in self.DepotEvents.keys():
             timediff = datetime.now() - self.DepotEventTimestamps[marketID]
             if ((marketID in self.listbox_IDs) and
@@ -543,9 +543,11 @@ class ConstructionHelper():
                   (self.DepotEvents[marketID]['ConstructionComplete'] or
                    self.DepotEvents[marketID]['ConstructionFailed'])):
                 #untracked but finished sites get stored with long timeout
+                #print('Storing finished site',marketID)
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'
             elif ((not local_storage) and (timediff.total_seconds() < self.untracked_timeout)):
                 #untracked and unfinished sites time out faster
+                #print('Storing untracked site',marketID)
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'
             else:
                 #if not local_storage: print('Market',marketID,'timed out.')
