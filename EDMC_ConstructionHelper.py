@@ -539,7 +539,7 @@ class ConstructionHelper():
             if ((marketID in self.listbox_IDs) and
                 (timediff.total_seconds() < self.storage_timeout)):
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'
-            elif ((not local_storage) and (timediff.total_seconds() < self.storage_timeout) and
+            elif ((timediff.total_seconds() < self.storage_timeout) and
                   (self.DepotEvents[marketID]['ConstructionComplete'] or
                    self.DepotEvents[marketID]['ConstructionFailed'])):
                 #untracked but finished sites get stored with long timeout
