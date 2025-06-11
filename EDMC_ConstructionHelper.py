@@ -382,7 +382,7 @@ class ConstructionHelper():
         pass
     
     def clip_system_names(self, ButtonPress=None):
-        if ButtonPress: print("Called via hotkey",ButtonPress)
+        #if ButtonPress: print("Called via hotkey",ButtonPress)
         clipstring = ""
         for idx in self.gui_listbox.curselection():
             if clipstring:
@@ -446,8 +446,9 @@ class ConstructionHelper():
         #set up the contex menu
         self.gui_listbox.focus_set()
         self.context_listbox = ContextMenu.ListboxContextMenu(self.gui_listbox, self)
-        self.gui_frame.bind("<Button-1>", self.context_listbox.hide_context_menu)
-        self.gui_frame.bind("<Button-3>", self.context_listbox.hide_context_menu)
+        self.gui_frame.bind("<Button-1>", self.context_listbox.hide_context_menu)        
+        self.gui_goods.bind("<Button-1>", self.context_listbox.hide_context_menu)        
+        self.gui_values.bind("<Button-1>", self.context_listbox.hide_context_menu)        
         self.gui_listbox.bind("<Control-c>", self.clip_system_names)
         
         self.update_listbox()
