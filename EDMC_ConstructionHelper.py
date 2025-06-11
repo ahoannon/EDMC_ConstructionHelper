@@ -81,7 +81,7 @@ class ConstructionHelper():
         # minimum time between ftp downloads
         self.ftp_download_delay = 60
         # don't send data entries for non-tracked sites that are older than this (in seconds)
-        self.untracked_timeout = 43200 # 12 hours
+        self.untracked_timeout = 86400 # 24 hours
 
         
         # maximum height of the site selection listbox
@@ -254,10 +254,10 @@ class ConstructionHelper():
                 self.update_values()
                 self.save_data()
         else: #Construction is either complete or has failed
+            self.DepotEventTimestamps[entry['MarketID']] = newtime
+            self.DepotEvents[entry['MarketID']] = entry
             if entry['MarketID'] in self.GoodsRequired:
                 self.GoodsRequired.pop(entry['MarketID'])
-                self.DepotEventTimestamps[entry['MarketID']] = newtime
-                self.DepotEvents[entry['MarketID']] = entry
                 self.update_listbox()
                 self.update_values()
         #signal the worker that we are done (if needed)
