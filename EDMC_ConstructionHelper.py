@@ -11,6 +11,7 @@ import tkinter.font as tkFont
 from tkinter import messagebox as mbox
 import ftplib
 from io import BytesIO
+import ConstHelper_ContextMenu as ContextMenu
 # ---- EDMC logger setup ----
 import logging
 import os
@@ -408,6 +409,11 @@ class ConstructionHelper():
 
         self.gui_ftp_status.grid_remove()
         #self.gui_ftp_status.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
+
+        #set up the contex menu
+        self.context_listbox = ContextMenu.ListboxContextMenu(self.gui_listbox, self)
+        self.gui_frame.bind("<Button-1>", self.context_listbox.hide_context_menu)
+        self.gui_frame.bind("<Button-3>", self.context_listbox.hide_context_menu)
         
         self.update_listbox()
         self.update_values()
@@ -418,7 +424,7 @@ class ConstructionHelper():
             self.theme = theme.active
         return self.gui_frame
 
-    def remove_sites(self,ButtonPress):
+    def remove_sites(self, ButtonPress=None):
         removeText = "Remove the following site(s)?\n"        
         for idx in self.gui_listbox.curselection():
             removeText += "- "+self.listbox_stations[idx]+"\n"
