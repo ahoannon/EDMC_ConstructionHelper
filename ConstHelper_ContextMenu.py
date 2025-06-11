@@ -14,9 +14,9 @@ class ListboxContextMenu:
         self.context_menu = tk.Menu(self.parent, tearoff=tk.FALSE)
         self.context_menu.add_command(label="Remove Site(s)", accelerator="<double-click>",
                                       command=self.remove_site)
-        self.context_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<CTRL-V>",
+        self.context_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<Control-C>",
                                       command=self.copy_system_to_clipboard)
-        self.context_menu.add_command(label="Export Required Goods to CSV", command=self.export_goods_to_csv)
+        #self.context_menu.add_command(label="Export Required Goods to CSV", command=self.export_goods_to_csv)
         
         # Bind right-click event to listbox
         self.parent.bind("<Button-3>", self.show_context_menu)  # Right-click on Windows/Linux
@@ -51,8 +51,8 @@ class ListboxContextMenu:
         self.const_helper.remove_sites()
 
     def copy_system_to_clipboard(self):
-        print("copy_system_to_clipboard called")
-        pass
+        #print("copy_system_to_clipboard called")
+        self.const_helper.clip_system_names()
 
     def export_goods_to_csv(self):
         print("export_goods_to_csv called")

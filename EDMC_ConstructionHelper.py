@@ -1,8 +1,9 @@
 """
 EDMC Construction Helper class
 """
-import time
+import time, sys
 import threading
+import subprocess
 from datetime import datetime
 import json
 import tkinter as tk
@@ -365,8 +366,40 @@ class ConstructionHelper():
         self.gui_button_open.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
         self.gui_button_close.grid_remove()
 
+#---------- handle event callbacks
 
-#---------- hand the general GUI
+    def remove_sites(self, ButtonPress=None):
+        removeText = "Remove the following site(s)?\n"        
+        for idx in self.gui_listbox.curselection():
+            removeText += "- "+self.listbox_stations[idx]+"\n"
+        result = mbox.askokcancel("Remove Sites", removeText,icon=mbox.WARNING)
+        if result:
+            for idx in self.gui_listbox.curselection():
+                self.GoodsRequired.pop(self.listbox_IDs[idx])
+            self.update_listbox()
+            self.update_values()
+            self.save_data()
+        pass
+    
+    def clip_system_names(self, ButtonPress=None):
+        if ButtonPress: print("Called via hotkey",ButtonPress)
+        clipstring = ""
+        for idx in self.gui_listbox.curselection():
+            if clipstring:
+                clipstring += ","
+            MarketID = self.listbox_IDs[int(idx)]
+            clipstring += self.SiteNames[MarketID]['System']
+        if sys.platform == "linux" or sys.platform == "linux2":
+            clipper = subprocess.Popen(["xclip", "-selection", "clipboard"],
+                                       stdin=subprocess.PIPE)
+            clipper.communicate(clipstring.encode('utf-8'))
+        else:
+            self.parent.clipboard_clear()
+            self.parent.clipboard_append(clipstring)
+            self.parent.update()
+
+
+#---------- handle the general GUI
     def init_gui(self,parent):
         self.parent = parent
         self.gui_frame = tk.Frame(parent, borderwidth=0)
@@ -411,9 +444,11 @@ class ConstructionHelper():
         #self.gui_ftp_status.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
 
         #set up the contex menu
+        self.gui_listbox.focus_set()
         self.context_listbox = ContextMenu.ListboxContextMenu(self.gui_listbox, self)
         self.gui_frame.bind("<Button-1>", self.context_listbox.hide_context_menu)
         self.gui_frame.bind("<Button-3>", self.context_listbox.hide_context_menu)
+        self.gui_listbox.bind("<Control-c>", self.clip_system_names)
         
         self.update_listbox()
         self.update_values()
@@ -424,19 +459,6 @@ class ConstructionHelper():
             self.theme = theme.active
         return self.gui_frame
 
-    def remove_sites(self, ButtonPress=None):
-        removeText = "Remove the following site(s)?\n"        
-        for idx in self.gui_listbox.curselection():
-            removeText += "- "+self.listbox_stations[idx]+"\n"
-        result = mbox.askokcancel("Remove Sites", removeText,icon=mbox.WARNING)
-        if result:
-            for idx in self.gui_listbox.curselection():
-                self.GoodsRequired.pop(self.listbox_IDs[idx])
-            self.update_listbox()
-            self.update_values()
-            self.save_data()
-        pass
-    
     def fix_theme(self):
         #patched in theme support
         #ugly solution, needs to be imporved!
