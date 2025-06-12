@@ -367,11 +367,11 @@ class ConstructionHelper():
         self.gui_overlay.attributes("-alpha", self.config_Alpha)
         #change buttons on main window
         self.gui_button_open.grid_remove()
-        self.gui_button_close.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
+        self.gui_button_close.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
 
     def close_overlay(self):
         self.gui_overlay.destroy()
-        self.gui_button_open.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
+        self.gui_button_open.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
         self.gui_button_close.grid_remove()
 
 #---------- handle event callbacks
