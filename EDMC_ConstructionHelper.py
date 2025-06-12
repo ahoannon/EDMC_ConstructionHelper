@@ -58,6 +58,8 @@ class ConstructionHelper():
         self.config_Alpha = 0.7
         #Windows-only: make overlay background fully transparent
         self.config_BGtrans = False
+        # display the total number of tons needed
+        self.show_total = True
         # display the economy composition of a station the user is docked to
         self.show_economy = True
         
@@ -101,6 +103,7 @@ class ConstructionHelper():
         self.DepotEvents = {}
         self.goods_string = tk.StringVar()
         self.values_string = tk.StringVar()
+        self.totals_string = tk.StringVar()
         self.listbox_items = tk.StringVar()
         self.station_economy = tk.StringVar()
         self.ftp_status = ""
@@ -129,7 +132,8 @@ class ConstructionHelper():
                 if config.get_str(self.Prefix+"overlayFG"):
                     self.config_overlayBG = config.get_str(self.Prefix+"overlayBG")
                 if config.get_str(self.Prefix+"Alpha"):                
-                    self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.                
+                    self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
+                self.show_total = config.get_bool(self.Prefix+"ShowTotal")
                 self.show_economy = config.get_bool(self.Prefix+"ShowEconomy")
                 # defaults to false anyhow:
                 self.do_file_storage = config.get_bool(self.Prefix+"DoFile")
@@ -144,8 +148,9 @@ class ConstructionHelper():
                 if config.get_str(self.Prefix+"FTPPasswd"):
                     self.ftp_password = config.get_str(self.Prefix+"FTPPasswd")
                 if config.get_str(self.Prefix+"FTPFilePath"):
-                    self.ftp_filepath = config.get_str(self.Prefix+"FTPFilePath")                
+                    self.ftp_filepath = config.get_str(self.Prefix+"FTPFilePath")
             except ValueError:
+                print("ValueError raised")
                 pass
             if (self.do_ftp_storage and not (self.ftp_server and self.ftp_user and
                                              self.ftp_password and self.ftp_filepath)):
@@ -162,6 +167,7 @@ class ConstructionHelper():
            config.set(self.Prefix+"overlayFG", str(self.config_overlayFG))
            config.set(self.Prefix+"overlayBG", str(self.config_overlayBG))
            config.set(self.Prefix+"Alpha", str(int(self.config_Alpha*100)))
+           config.set(self.Prefix+"ShowTotal", bool(self.show_total))
            config.set(self.Prefix+"ShowEconomy", bool(self.show_economy))
            config.set(self.Prefix+"DoFile", bool(self.do_file_storage))
            config.set(self.Prefix+"storage_file", str(self.storage_file))
@@ -422,10 +428,16 @@ class ConstructionHelper():
                                    justify=tk.LEFT)
         self.gui_goods.grid(column=0,row=1,sticky=(tk.E))
         self.gui_values.grid(column=1,row=1,sticky=(tk.W))
-        
+        self.gui_total_label =  tk.Label(self.gui_frame, text="Total:",
+                                  justify=tk.RIGHT)
+        self.gui_total_values = tk.Label(self.gui_frame, textvariable=self.totals_string,
+                                   justify=tk.LEFT)
+        #self.gui_total_label.grid(column=0,row=2,sticky=(tk.E))
+        #self.gui_total_values.grid(column=1,row=2,sticky=(tk.W))
+       
         self.gui_button_open = tk.Button(self.gui_frame,text="Open overlay",
                                           command=self.open_overlay)
-        self.gui_button_open.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
+        self.gui_button_open.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
         self.gui_button_close = tk.Button(self.gui_frame,text="Close overlay",
                                           command=self.close_overlay)
         self.gui_button_close.grid_remove()
@@ -433,7 +445,7 @@ class ConstructionHelper():
         self.gui_frame.grid_columnconfigure(1, weight=1)
         self.gui_economies = tk.Label(self.gui_frame, textvariable=self.station_economy,
                                       justify=tk.LEFT )
-        self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
+        #self.gui_economies.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
         self.gui_ftp_status = tk.Label(self.gui_frame, textvariable=self.ftp_status_var,
                                        justify=tk.LEFT )
         fontObj = tkFont.Font(self.gui_ftp_status,self.gui_ftp_status.cget("font"))
@@ -441,7 +453,6 @@ class ConstructionHelper():
         self.gui_ftp_status.configure(font=fontObj)
 
         self.gui_ftp_status.grid_remove()
-        #self.gui_ftp_status.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
 
         #set up the contex menu
         self.gui_listbox.focus_set()
@@ -461,9 +472,10 @@ class ConstructionHelper():
         #trigger a race condition
         ### only for debugging!!! ###
         #time.sleep(1)
+        self.apply_gui_settings()
         return self.gui_frame
 
-    def apply_settings(self):
+    def apply_gui_settings(self):
         #patched in theme support
         #ugly solution, needs to be imporved!
         if self.theme != theme.active:
@@ -473,9 +485,15 @@ class ConstructionHelper():
                 self.gui_listbox.configure(background='white')
         self.theme = theme.active
         if self.show_economy:
-            self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
+            self.gui_economies.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
         else:
             self.gui_economies.grid_remove()
+        if self.show_total:
+            self.gui_total_label.grid(column=0,row=2,sticky=(tk.E))
+            self.gui_total_values.grid(column=1,row=2,sticky=(tk.W))
+        else:
+            self.gui_total_label.grid_remove()
+            self.gui_total_values.grid_remove()
         self.ftp_status = ""
         self.update_ftp_status()
 
@@ -535,13 +553,16 @@ class ConstructionHelper():
                         current[resource] += self.GoodsRequired[MarketID][resource]
             goods=""
             values=""
+            total = 0
             keys_sorted = list(current.keys())
             keys_sorted.sort()
             for resource in keys_sorted:
                 goods += resource+":\n"
                 values += str(current[resource])+"\n"
+                total += current[resource]
             self.goods_string.set(goods[:-1])
             self.values_string.set(values[:-1])
+            self.totals_string.set(str(total))
 
 #---------- handle storage of data
 
