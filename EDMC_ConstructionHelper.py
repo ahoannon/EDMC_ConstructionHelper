@@ -495,12 +495,17 @@ class ConstructionHelper():
 
         #set up the contex menu
         self.gui_listbox.focus_set()
-        self.context_listbox = ContextMenu.ListboxContextMenu(self.gui_listbox, self)
-        self.gui_frame.bind("<Button-1>", self.context_listbox.hide_context_menu)        
-        self.gui_goods.bind("<Button-1>", self.context_listbox.hide_context_menu)        
-        self.gui_values.bind("<Button-1>", self.context_listbox.hide_context_menu)        
+        self.context_menus = ContextMenu.ContextMenus(self.gui_frame, self.gui_listbox, self)
+        self.context_menus.add_labels_binding(self.gui_goods)
+        self.context_menus.add_labels_binding(self.gui_values)
+        self.context_menus.add_labels_binding(self.gui_total_label)
+        self.context_menus.add_labels_binding(self.gui_total_values)
+        self.gui_frame.bind("<Button-1>", self.context_menus.hide_context_menu) 
+        self.gui_goods.bind("<Button-1>", self.context_menus.hide_context_menu) 
+        self.gui_values.bind("<Button-1>", self.context_menus.hide_context_menu)
+        self.gui_total_label.bind("<Button-1>", self.context_menus.hide_context_menu) 
+        self.gui_total_values.bind("<Button-1>", self.context_menus.hide_context_menu) 
         self.gui_listbox.bind("<Control-Shift-C>", self.clip_system_names)
-        self.gui_goods.bind("<Button-3>", self.clip_resources_spreadsheet)        
         
         self.update_listbox()
         self.update_values()

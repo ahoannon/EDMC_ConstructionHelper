@@ -6,45 +6,71 @@ from tkinter import ttk
 from tkinter import messagebox as mbox
 import time
 
-class ListboxContextMenu:
-    def __init__(self, listbox, construction_helper):
+class ContextMenus:
+    def __init__(self, frame, listbox, construction_helper):
         """Create and set up the context menu for the listbox"""
-        self.parent = listbox
+        self.parent = frame
+        self.listbox = listbox
         self.const_helper = construction_helper
-        self.context_menu = tk.Menu(self.parent, tearoff=tk.FALSE)
-        self.context_menu.add_command(label="Remove Site(s)", accelerator="<double-click>",
+        self.listbox_menu = tk.Menu(self.listbox, tearoff=tk.FALSE)
+        self.listbox_menu.add_command(label="Remove Site(s)", accelerator="<double-click>",
                                       command=self.remove_site)
-        self.context_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
+        self.listbox_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
                                       command=self.copy_system_to_clipboard)
-        self.context_menu.add_command(label="Export Goods for Spreadsheet", command=self.export_goods_to_spreadsheet)
-        
+        self.listbox_menu.add_command(label="Export Goods for Spreadsheet", command=self.export_goods_to_spreadsheet)        
         # Bind right-click event to listbox
-        self.parent.bind("<Button-3>", self.show_context_menu)  # Right-click on Windows/Linux
-        # make the context menu go away when it looses the mouse focus
-        self.parent.bind("<FocusOut>", self.hide_context_menu)
-    
-    def show_context_menu(self, event):
+        self.listbox.bind("<Button-3>", self.show_listbox_menu)  # Right-click on Windows/Linux
+        # make the context menus go away when it looses the mouse focus
+        self.listbox.bind("<FocusOut>", self.hide_context_menu)
+        
+        self.labels_menu = tk.Menu(self.parent, tearoff=tk.FALSE)
+        self.labels_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
+                                      command=self.copy_system_to_clipboard)
+        self.labels_menu.add_command(label="Export Goods for Spreadsheet", command=self.export_goods_to_spreadsheet)
+        
+        # Bind right-click event to parent
+        self.parent.bind("<Button-3>", self.show_labels_menu)  # Right-click on Windows/Linux
+
+    def add_labels_binding(self, widget):
+        widget.bind("<Button-3>", self.show_labels_menu)            
+
+    def show_listbox_menu(self, event):
         """Show context menu at cursor position"""
+        if self.labels_menu:
+            self.labels_menu.unpost()
         #set focus on listbox so that "<FocusOut>" works
-        self.parent.focus_set()
+        self.listbox.focus_set()
         # Select the item under cursor
-        index = self.parent.nearest(event.y)
-        if index < self.parent.size():
-            self.parent.selection_clear(0, tk.END)
-            self.parent.selection_set(index)
-            self.parent.activate(index)
+        index = self.listbox.nearest(event.y)
+        if index < self.listbox.size():
+            self.listbox.selection_clear(0, tk.END)
+            self.listbox.selection_set(index)
+            self.listbox.activate(index)
             self.const_helper.update_values()
         # Show context menu
         try:
-            #self.context_menu.tk_popup(event.x_root, event.y_root)            
-            self.context_menu.post(event.x_root, event.y_root)
+            #self.listbox_menu.tk_popup(event.x_root, event.y_root)            
+            self.listbox_menu.post(event.x_root, event.y_root)
         finally:
-            self.context_menu.grab_release()
+            self.listbox_menu.grab_release()
+
+    def show_labels_menu(self, event):
+        if self.listbox_menu:
+            self.listbox_menu.unpost()
+        #set focus on listbox so that "<FocusOut>" works
+        self.listbox.focus_set()
+        # Show labels context menu
+        try:
+            self.labels_menu.post(event.x_root, event.y_root)
+        finally:
+            self.labels_menu.grab_release()
             
     def hide_context_menu(self, event=None):
         #print("hide_context_menu called")
-        if self.context_menu:
-            self.context_menu.unpost()
+        if self.listbox_menu:
+            self.listbox_menu.unpost()
+        if self.labels_menu:
+            self.labels_menu.unpost()
 
     def remove_site(self):
         #print("remove_site called")
@@ -55,5 +81,5 @@ class ListboxContextMenu:
         self.const_helper.clip_system_names()
 
     def export_goods_to_spreadsheet(self):
-        print("export_goods_to_spreadsheet called")
-        pass
+        #print("export_goods_to_spreadsheet called")
+        self.const_helper.clip_resources_spreadsheet()
