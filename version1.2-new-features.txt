@@ -1,4 +1,5 @@
 -listbox context menu
+-sort listbox entries
 -copy system name
 -list total tons needed
 -cvs export?

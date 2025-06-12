@@ -115,6 +115,7 @@ class ConstructionHelper():
         self.worker_thread = False
         self.worker_event = threading.Event()
         self.tmpwindow = False
+        self.current = {}
         self.get_config()
         self.set_config()
 
@@ -392,10 +393,12 @@ class ConstructionHelper():
         #if ButtonPress: print("Called via hotkey",ButtonPress)
         clipstring = ""
         for idx in self.gui_listbox.curselection():
-            if clipstring:
-                clipstring += ", "
             MarketID = self.listbox_IDs[int(idx)]
-            clipstring += self.SiteNames[MarketID]['System']
+            sysname = self.SiteNames[MarketID]['System']
+            if (clipstring.find(sysname) == -1):
+                if clipstring:
+                    clipstring += ", "
+                clipstring += sysname
         #if sys.platform == "linux" or sys.platform == "linux2":
         #    clipper = subprocess.Popen(["xclip", "-selection", "clipboard"],
         #                               stdin=subprocess.PIPE)
@@ -404,17 +407,37 @@ class ConstructionHelper():
         self.parent.clipboard_clear()
         self.parent.clipboard_append(clipstring)
         self.parent.update()
+        self.open_tmpwindow("Copied system(s)",1000)
+
+    def clip_resources_spreadsheet(self, ButtonPress=None):
+        clipstring = ""
+        keys_sorted = list(self.current.keys())
+        keys_sorted.sort()
+        for resource in keys_sorted:
+            clipstring +=  resource+"\t"
+            clipstring += str(self.current[resource])+"\n"
+        if not clipstring:
+            self.open_tmpwindow("No needed resources.",3000)
+        else:
+            self.parent.clipboard_clear()
+            self.parent.clipboard_append(clipstring[:-1])
+            self.parent.update()
+            self.open_tmpwindow("Copied resources for spreadsheet",1000)
+
+            
+    def open_tmpwindow(self, infotext="test", duration=1000):
         if not self.tmpwindow:
             self.tmpwindow = tk.Toplevel()
             self.tmpwindow.overrideredirect(True)
             posy = max(0,self.gui_frame.winfo_pointery()-20)
             self.tmpwindow.geometry("+%d+%d"%(self.gui_frame.winfo_pointerx(),posy))
             self.tmpwindow.attributes("-topmost", 1)
-            tmplabel = tk.Label(self.tmpwindow,text="Copied system(s)")
+            tmplabel = tk.Label(self.tmpwindow,text=infotext)
             tmplabel.grid()
             self.tmpwindow.wait_visibility(self.tmpwindow)
-            self.gui_frame.after(1000, self.destroy_tmpwindow)
+            self.gui_frame.after(duration, self.destroy_tmpwindow)
 
+            
     def destroy_tmpwindow(self):
         if self.tmpwindow:
             self.tmpwindow.destroy()
@@ -477,6 +500,7 @@ class ConstructionHelper():
         self.gui_goods.bind("<Button-1>", self.context_listbox.hide_context_menu)        
         self.gui_values.bind("<Button-1>", self.context_listbox.hide_context_menu)        
         self.gui_listbox.bind("<Control-Shift-C>", self.clip_system_names)
+        self.gui_goods.bind("<Button-3>", self.clip_resources_spreadsheet)        
         
         self.update_listbox()
         self.update_values()
@@ -559,23 +583,23 @@ class ConstructionHelper():
     def update_values(self,event=None):
         if len(self.listbox_IDs):
             #calculate the needed values
-            current = {}
+            self.current = {}
             for idx in self.gui_listbox.curselection():
                 MarketID = self.listbox_IDs[int(idx)]
                 for resource in self.GoodsRequired[MarketID].keys():
-                    if resource not in current:
-                        current[resource] = self.GoodsRequired[MarketID][resource]
+                    if resource not in self.current:
+                        self.current[resource] = self.GoodsRequired[MarketID][resource]
                     else:
-                        current[resource] += self.GoodsRequired[MarketID][resource]
+                        self.current[resource] += self.GoodsRequired[MarketID][resource]
             goods=""
             values=""
             total = 0
-            keys_sorted = list(current.keys())
+            keys_sorted = list(self.current.keys())
             keys_sorted.sort()
             for resource in keys_sorted:
                 goods += resource+":\n"
-                values += str(current[resource])+"\n"
-                total += current[resource]
+                values += str(self.current[resource])+"\n"
+                total += self.current[resource]
             self.goods_string.set(goods[:-1])
             self.values_string.set(values[:-1])
             self.totals_string.set(str(total))
