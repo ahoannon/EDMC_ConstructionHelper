@@ -458,6 +458,9 @@ class ConstructionHelper():
         self.worker_thread.start()
         if theme:
             self.theme = theme.active
+        #trigger a race condition
+        ### only for debugging!!! ###
+        #time.sleep(1)
         return self.gui_frame
 
     def fix_theme(self):
@@ -543,7 +546,14 @@ class ConstructionHelper():
 #---------- handle storage of data
 
     def startup_data_retrieval(self):
-        time.sleep(1)
+        main_thread_not_running = True
+        while main_thread_not_running:
+            try:
+                self.gui_frame.event_generate("<<Dummy-Event>>")
+                main_thread_not_running = False
+            except:
+                time.sleep(0.1)
+        #time.sleep(1)
         if self.do_file_storage:
             self.read_data()
         if (self.do_ftp_storage and self.ftp_server and
