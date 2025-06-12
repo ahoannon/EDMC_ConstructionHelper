@@ -555,6 +555,7 @@ class ConstructionHelper():
         if len(self.GoodsRequired) == 0:
             self.listbox_items.set(['No known construction site'])
             self.gui_listbox.config(height=1)
+            self.gui_scrollbar.grid_remove()
             self.gui_listbox.selection_clear(0)
             self.goods_string.set('')
             self.values_string.set('')
@@ -575,6 +576,10 @@ class ConstructionHelper():
         self.listbox_items.set(self.listbox_stations)
         lbox_height = min(len(self.GoodsRequired),self.config_listboxHeight)
         self.gui_listbox.config(height=lbox_height)
+        if lbox_height == self.config_listboxHeight:
+            self.gui_scrollbar.grid(column=2,row=0,sticky=(tk.N,tk.S))
+        else:
+            self.gui_scrollbar.grid_remove()
         # clear selection
         self.gui_listbox.selection_clear(0,len(self.listbox_IDs))
         # reset selection
