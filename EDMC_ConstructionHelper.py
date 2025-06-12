@@ -463,7 +463,7 @@ class ConstructionHelper():
         #time.sleep(1)
         return self.gui_frame
 
-    def fix_theme(self):
+    def apply_settings(self):
         #patched in theme support
         #ugly solution, needs to be imporved!
         if self.theme != theme.active:
