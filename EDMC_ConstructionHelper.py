@@ -114,6 +114,7 @@ class ConstructionHelper():
         self.last_ftp_download = datetime(2025, 5, 26)
         self.worker_thread = False
         self.worker_event = threading.Event()
+        self.tmpwindow = False
         self.get_config()
         self.set_config()
 
@@ -403,7 +404,22 @@ class ConstructionHelper():
         self.parent.clipboard_clear()
         self.parent.clipboard_append(clipstring)
         self.parent.update()
+        if not self.tmpwindow:
+            self.tmpwindow = tk.Toplevel()
+            self.tmpwindow.overrideredirect(True)
+            posy = max(0,self.gui_frame.winfo_pointery()-20)
+            self.tmpwindow.geometry("+%d+%d"%(self.gui_frame.winfo_pointerx(),posy))
+            self.tmpwindow.attributes("-topmost", 1)
+            tmplabel = tk.Label(self.tmpwindow,text="Copied system(s)")
+            tmplabel.grid()
+            self.tmpwindow.wait_visibility(self.tmpwindow)
+            self.gui_frame.after(1000, self.destroy_tmpwindow)
 
+    def destroy_tmpwindow(self):
+        if self.tmpwindow:
+            self.tmpwindow.destroy()
+            self.tmpwindow = False
+        
 
 #---------- handle the general GUI
     def init_gui(self,parent):
