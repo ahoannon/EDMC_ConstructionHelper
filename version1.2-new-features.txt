@@ -1,4 +1,5 @@
 -listbox context menu
 -copy system name
 -list total tons needed
--cvs export
+-cvs export?
+-copy required goods in spreadsheet format

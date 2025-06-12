@@ -386,17 +386,17 @@ class ConstructionHelper():
         clipstring = ""
         for idx in self.gui_listbox.curselection():
             if clipstring:
-                clipstring += ","
+                clipstring += ", "
             MarketID = self.listbox_IDs[int(idx)]
             clipstring += self.SiteNames[MarketID]['System']
-        if sys.platform == "linux" or sys.platform == "linux2":
-            clipper = subprocess.Popen(["xclip", "-selection", "clipboard"],
-                                       stdin=subprocess.PIPE)
-            clipper.communicate(clipstring.encode('utf-8'))
-        else:
-            self.parent.clipboard_clear()
-            self.parent.clipboard_append(clipstring)
-            self.parent.update()
+        #if sys.platform == "linux" or sys.platform == "linux2":
+        #    clipper = subprocess.Popen(["xclip", "-selection", "clipboard"],
+        #                               stdin=subprocess.PIPE)
+        #    clipper.communicate(clipstring.encode('utf-8'))
+        #else:
+        self.parent.clipboard_clear()
+        self.parent.clipboard_append(clipstring)
+        self.parent.update()
 
 
 #---------- handle the general GUI
@@ -449,7 +449,7 @@ class ConstructionHelper():
         self.gui_frame.bind("<Button-1>", self.context_listbox.hide_context_menu)        
         self.gui_goods.bind("<Button-1>", self.context_listbox.hide_context_menu)        
         self.gui_values.bind("<Button-1>", self.context_listbox.hide_context_menu)        
-        self.gui_listbox.bind("<Control-c>", self.clip_system_names)
+        self.gui_listbox.bind("<Control-Shift-C>", self.clip_system_names)
         
         self.update_listbox()
         self.update_values()
@@ -543,8 +543,8 @@ class ConstructionHelper():
 #---------- handle storage of data
 
     def startup_data_retrieval(self):
+        time.sleep(1)
         if self.do_file_storage:
-            time.sleep(0.1)
             self.read_data()
         if (self.do_ftp_storage and self.ftp_server and
             self.ftp_user and self.ftp_password and self.ftp_filepath):
