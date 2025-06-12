@@ -776,6 +776,7 @@ class ConstructionHelper():
                     self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
                                                                       StationName=pseudoname));
                     self.worker_event.wait() #wait for the main thread to be done with processing
+                    time.sleep(0.1) #give the gui some time to avoid strange effects
         except ftplib.error_perm as excep :
             print('Failed to retrieve file from server: '+repr(excep))
             self.ftp_status = 'Failed to retrieve file from server:\n '+str(excep)
