@@ -24,7 +24,7 @@ class ContextMenus:
         self.listbox.bind("<FocusOut>", self.hide_context_menu)
         
         self.labels_menu = tk.Menu(self.parent, tearoff=tk.FALSE)
-        self.labels_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
+        self.labels_menu.add_command(label="Copy Selected System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
                                       command=self.copy_system_to_clipboard)
         self.labels_menu.add_command(label="Export Goods for Spreadsheet", command=self.export_goods_to_spreadsheet)
         
