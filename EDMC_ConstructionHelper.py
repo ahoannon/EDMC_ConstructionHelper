@@ -570,9 +570,17 @@ class ConstructionHelper():
                 selectedIDs.append(self.listbox_IDs[int(idx)])
         self.listbox_IDs = []
         self.listbox_stations = []
+        IDs = []
+        stations = []
         for MarketID in self.GoodsRequired.keys():
-            self.listbox_IDs.append(MarketID)
-            self.listbox_stations.append(self.SiteNames[MarketID]['Name'])
+            #self.listbox_IDs.append(MarketID)
+            #self.listbox_stations.append(self.SiteNames[MarketID]['Name'])
+            IDs.append(MarketID)
+            stations.append(self.SiteNames[MarketID]['Name'])
+        sortindices = sorted(range(len(stations)), key=stations.__getitem__)
+        for idx in sortindices:
+            self.listbox_IDs.append(IDs[idx])
+            self.listbox_stations.append(stations[idx])
         self.listbox_items.set(self.listbox_stations)
         lbox_height = min(len(self.GoodsRequired),self.config_listboxHeight)
         self.gui_listbox.config(height=lbox_height)
