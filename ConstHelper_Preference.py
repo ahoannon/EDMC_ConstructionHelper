@@ -53,6 +53,7 @@ class CH_Preferences():
             self.FTPPasswd_label.config(state='normal')
             self.FTPFilePath_entry.config(state='normal')
             self.FTPFilePath_label.config(state='normal')
+            self.ftp_passwd_button.config(state='normal')
         else:
             self.FTPlabel.config(state='disabled')
             self.FTPServer_entry.config(state='disabled')
@@ -63,6 +64,7 @@ class CH_Preferences():
             self.FTPPasswd_label.config(state='disabled')
             self.FTPFilePath_entry.config(state='disabled')
             self.FTPFilePath_label.config(state='disabled')
+            self.ftp_passwd_button.config(state='disabled')
             
     def toggle_password(self, event=None):
         if self.Password_var.get():
