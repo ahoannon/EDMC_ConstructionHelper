@@ -1,8 +1,9 @@
 """
 EDMC Construction Helper class
 """
-import time
+import time, sys
 import threading
+import subprocess
 from datetime import datetime
 import json
 import tkinter as tk
@@ -11,6 +12,7 @@ import tkinter.font as tkFont
 from tkinter import messagebox as mbox
 import ftplib
 from io import BytesIO
+import ConstHelper_ContextMenu as ContextMenu
 # ---- EDMC logger setup ----
 import logging
 import os
@@ -56,6 +58,8 @@ class ConstructionHelper():
         self.config_Alpha = 0.7
         #Windows-only: make overlay background fully transparent
         self.config_BGtrans = False
+        # display the total number of tons needed
+        self.show_total = True
         # display the economy composition of a station the user is docked to
         self.show_economy = True
         
@@ -99,6 +103,7 @@ class ConstructionHelper():
         self.DepotEvents = {}
         self.goods_string = tk.StringVar()
         self.values_string = tk.StringVar()
+        self.totals_string = tk.StringVar()
         self.listbox_items = tk.StringVar()
         self.station_economy = tk.StringVar()
         self.ftp_status = ""
@@ -109,6 +114,8 @@ class ConstructionHelper():
         self.last_ftp_download = datetime(2025, 5, 26)
         self.worker_thread = False
         self.worker_event = threading.Event()
+        self.tmpwindow = False
+        self.current = {}
         self.get_config()
         self.set_config()
 
@@ -127,7 +134,8 @@ class ConstructionHelper():
                 if config.get_str(self.Prefix+"overlayFG"):
                     self.config_overlayBG = config.get_str(self.Prefix+"overlayBG")
                 if config.get_str(self.Prefix+"Alpha"):                
-                    self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.                
+                    self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
+                self.show_total = config.get_bool(self.Prefix+"ShowTotal")
                 self.show_economy = config.get_bool(self.Prefix+"ShowEconomy")
                 # defaults to false anyhow:
                 self.do_file_storage = config.get_bool(self.Prefix+"DoFile")
@@ -142,8 +150,9 @@ class ConstructionHelper():
                 if config.get_str(self.Prefix+"FTPPasswd"):
                     self.ftp_password = config.get_str(self.Prefix+"FTPPasswd")
                 if config.get_str(self.Prefix+"FTPFilePath"):
-                    self.ftp_filepath = config.get_str(self.Prefix+"FTPFilePath")                
+                    self.ftp_filepath = config.get_str(self.Prefix+"FTPFilePath")
             except ValueError:
+                print("ValueError raised")
                 pass
             if (self.do_ftp_storage and not (self.ftp_server and self.ftp_user and
                                              self.ftp_password and self.ftp_filepath)):
@@ -160,6 +169,7 @@ class ConstructionHelper():
            config.set(self.Prefix+"overlayFG", str(self.config_overlayFG))
            config.set(self.Prefix+"overlayBG", str(self.config_overlayBG))
            config.set(self.Prefix+"Alpha", str(int(self.config_Alpha*100)))
+           config.set(self.Prefix+"ShowTotal", bool(self.show_total))
            config.set(self.Prefix+"ShowEconomy", bool(self.show_economy))
            config.set(self.Prefix+"DoFile", bool(self.do_file_storage))
            config.set(self.Prefix+"storage_file", str(self.storage_file))
@@ -357,15 +367,84 @@ class ConstructionHelper():
         self.gui_overlay.attributes("-alpha", self.config_Alpha)
         #change buttons on main window
         self.gui_button_open.grid_remove()
-        self.gui_button_close.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
+        self.gui_button_close.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
 
     def close_overlay(self):
         self.gui_overlay.destroy()
-        self.gui_button_open.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
+        self.gui_button_open.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
         self.gui_button_close.grid_remove()
 
+#---------- handle event callbacks
 
-#---------- hand the general GUI
+    def remove_sites(self, ButtonPress=None):
+        removeText = "Remove the following site(s)?\n"        
+        for idx in self.gui_listbox.curselection():
+            removeText += "- "+self.listbox_stations[idx]+"\n"
+        result = mbox.askokcancel("Remove Sites", removeText,icon=mbox.WARNING)
+        if result:
+            for idx in self.gui_listbox.curselection():
+                self.GoodsRequired.pop(self.listbox_IDs[idx])
+            self.update_listbox()
+            self.update_values()
+            self.save_data()
+        pass
+    
+    def clip_system_names(self, ButtonPress=None):
+        #if ButtonPress: print("Called via hotkey",ButtonPress)
+        clipstring = ""
+        for idx in self.gui_listbox.curselection():
+            MarketID = self.listbox_IDs[int(idx)]
+            sysname = self.SiteNames[MarketID]['System']
+            if (clipstring.find(sysname) == -1):
+                if clipstring:
+                    clipstring += ", "
+                clipstring += sysname
+        #if sys.platform == "linux" or sys.platform == "linux2":
+        #    clipper = subprocess.Popen(["xclip", "-selection", "clipboard"],
+        #                               stdin=subprocess.PIPE)
+        #    clipper.communicate(clipstring.encode('utf-8'))
+        #else:
+        self.parent.clipboard_clear()
+        self.parent.clipboard_append(clipstring)
+        self.parent.update()
+        self.open_tmpwindow("Copied system(s)",1000)
+
+    def clip_resources_spreadsheet(self, ButtonPress=None):
+        clipstring = ""
+        keys_sorted = list(self.current.keys())
+        keys_sorted.sort()
+        for resource in keys_sorted:
+            clipstring +=  resource+"\t"
+            clipstring += str(self.current[resource])+"\n"
+        if not clipstring:
+            self.open_tmpwindow("No needed resources.",3000)
+        else:
+            self.parent.clipboard_clear()
+            self.parent.clipboard_append(clipstring[:-1])
+            self.parent.update()
+            self.open_tmpwindow("Copied resources for spreadsheet",1000)
+
+            
+    def open_tmpwindow(self, infotext="test", duration=1000):
+        if not self.tmpwindow:
+            self.tmpwindow = tk.Toplevel()
+            self.tmpwindow.overrideredirect(True)
+            posy = max(0,self.gui_frame.winfo_pointery()-20)
+            self.tmpwindow.geometry("+%d+%d"%(self.gui_frame.winfo_pointerx(),posy))
+            self.tmpwindow.attributes("-topmost", 1)
+            tmplabel = tk.Label(self.tmpwindow,text=infotext)
+            tmplabel.grid()
+            self.tmpwindow.wait_visibility(self.tmpwindow)
+            self.gui_frame.after(duration, self.destroy_tmpwindow)
+
+            
+    def destroy_tmpwindow(self):
+        if self.tmpwindow:
+            self.tmpwindow.destroy()
+            self.tmpwindow = False
+        
+
+#---------- handle the general GUI
     def init_gui(self,parent):
         self.parent = parent
         self.gui_frame = tk.Frame(parent, borderwidth=0)
@@ -388,10 +467,16 @@ class ConstructionHelper():
                                    justify=tk.LEFT)
         self.gui_goods.grid(column=0,row=1,sticky=(tk.E))
         self.gui_values.grid(column=1,row=1,sticky=(tk.W))
-        
+        self.gui_total_label =  tk.Label(self.gui_frame, text="Total:",
+                                  justify=tk.RIGHT)
+        self.gui_total_values = tk.Label(self.gui_frame, textvariable=self.totals_string,
+                                   justify=tk.LEFT)
+        #self.gui_total_label.grid(column=0,row=2,sticky=(tk.E))
+        #self.gui_total_values.grid(column=1,row=2,sticky=(tk.W))
+       
         self.gui_button_open = tk.Button(self.gui_frame,text="Open overlay",
                                           command=self.open_overlay)
-        self.gui_button_open.grid(column=0,row=2,columnspan=3,sticky=(tk.E,tk.W))
+        self.gui_button_open.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
         self.gui_button_close = tk.Button(self.gui_frame,text="Close overlay",
                                           command=self.close_overlay)
         self.gui_button_close.grid_remove()
@@ -399,7 +484,7 @@ class ConstructionHelper():
         self.gui_frame.grid_columnconfigure(1, weight=1)
         self.gui_economies = tk.Label(self.gui_frame, textvariable=self.station_economy,
                                       justify=tk.LEFT )
-        self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
+        #self.gui_economies.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
         self.gui_ftp_status = tk.Label(self.gui_frame, textvariable=self.ftp_status_var,
                                        justify=tk.LEFT )
         fontObj = tkFont.Font(self.gui_ftp_status,self.gui_ftp_status.cget("font"))
@@ -407,7 +492,20 @@ class ConstructionHelper():
         self.gui_ftp_status.configure(font=fontObj)
 
         self.gui_ftp_status.grid_remove()
-        #self.gui_ftp_status.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
+
+        #set up the contex menu
+        self.gui_listbox.focus_set()
+        self.context_menus = ContextMenu.ContextMenus(self.gui_frame, self.gui_listbox, self)
+        self.context_menus.add_labels_binding(self.gui_goods)
+        self.context_menus.add_labels_binding(self.gui_values)
+        self.context_menus.add_labels_binding(self.gui_total_label)
+        self.context_menus.add_labels_binding(self.gui_total_values)
+        self.gui_frame.bind("<Button-1>", self.context_menus.hide_context_menu) 
+        self.gui_goods.bind("<Button-1>", self.context_menus.hide_context_menu) 
+        self.gui_values.bind("<Button-1>", self.context_menus.hide_context_menu)
+        self.gui_total_label.bind("<Button-1>", self.context_menus.hide_context_menu) 
+        self.gui_total_values.bind("<Button-1>", self.context_menus.hide_context_menu) 
+        self.gui_listbox.bind("<Control-Shift-C>", self.clip_system_names)
         
         self.update_listbox()
         self.update_values()
@@ -416,22 +514,13 @@ class ConstructionHelper():
         self.worker_thread.start()
         if theme:
             self.theme = theme.active
+        #trigger a race condition
+        ### only for debugging!!! ###
+        #time.sleep(1)
+        self.apply_gui_settings()
         return self.gui_frame
 
-    def remove_sites(self,ButtonPress):
-        removeText = "Remove the following site(s)?\n"        
-        for idx in self.gui_listbox.curselection():
-            removeText += "- "+self.listbox_stations[idx]+"\n"
-        result = mbox.askokcancel("Remove Sites", removeText,icon=mbox.WARNING)
-        if result:
-            for idx in self.gui_listbox.curselection():
-                self.GoodsRequired.pop(self.listbox_IDs[idx])
-            self.update_listbox()
-            self.update_values()
-            self.save_data()
-        pass
-    
-    def fix_theme(self):
+    def apply_gui_settings(self):
         #patched in theme support
         #ugly solution, needs to be imporved!
         if self.theme != theme.active:
@@ -441,9 +530,15 @@ class ConstructionHelper():
                 self.gui_listbox.configure(background='white')
         self.theme = theme.active
         if self.show_economy:
-            self.gui_economies.grid(column=0,row=3,columnspan=3,sticky=(tk.W))
+            self.gui_economies.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
         else:
             self.gui_economies.grid_remove()
+        if self.show_total:
+            self.gui_total_label.grid(column=0,row=2,sticky=(tk.E))
+            self.gui_total_values.grid(column=1,row=2,sticky=(tk.W))
+        else:
+            self.gui_total_label.grid_remove()
+            self.gui_total_values.grid_remove()
         self.ftp_status = ""
         self.update_ftp_status()
 
@@ -460,6 +555,7 @@ class ConstructionHelper():
         if len(self.GoodsRequired) == 0:
             self.listbox_items.set(['No known construction site'])
             self.gui_listbox.config(height=1)
+            self.gui_scrollbar.grid_remove()
             self.gui_listbox.selection_clear(0)
             self.goods_string.set('')
             self.values_string.set('')
@@ -474,12 +570,24 @@ class ConstructionHelper():
                 selectedIDs.append(self.listbox_IDs[int(idx)])
         self.listbox_IDs = []
         self.listbox_stations = []
+        IDs = []
+        stations = []
         for MarketID in self.GoodsRequired.keys():
-            self.listbox_IDs.append(MarketID)
-            self.listbox_stations.append(self.SiteNames[MarketID]['Name'])
+            #self.listbox_IDs.append(MarketID)
+            #self.listbox_stations.append(self.SiteNames[MarketID]['Name'])
+            IDs.append(MarketID)
+            stations.append(self.SiteNames[MarketID]['Name'])
+        sortindices = sorted(range(len(stations)), key=stations.__getitem__)
+        for idx in sortindices:
+            self.listbox_IDs.append(IDs[idx])
+            self.listbox_stations.append(stations[idx])
         self.listbox_items.set(self.listbox_stations)
         lbox_height = min(len(self.GoodsRequired),self.config_listboxHeight)
         self.gui_listbox.config(height=lbox_height)
+        if lbox_height == self.config_listboxHeight:
+            self.gui_scrollbar.grid(column=2,row=0,sticky=(tk.N,tk.S))
+        else:
+            self.gui_scrollbar.grid_remove()
         # clear selection
         self.gui_listbox.selection_clear(0,len(self.listbox_IDs))
         # reset selection
@@ -493,29 +601,39 @@ class ConstructionHelper():
     def update_values(self,event=None):
         if len(self.listbox_IDs):
             #calculate the needed values
-            current = {}
+            self.current = {}
             for idx in self.gui_listbox.curselection():
                 MarketID = self.listbox_IDs[int(idx)]
                 for resource in self.GoodsRequired[MarketID].keys():
-                    if resource not in current:
-                        current[resource] = self.GoodsRequired[MarketID][resource]
+                    if resource not in self.current:
+                        self.current[resource] = self.GoodsRequired[MarketID][resource]
                     else:
-                        current[resource] += self.GoodsRequired[MarketID][resource]
+                        self.current[resource] += self.GoodsRequired[MarketID][resource]
             goods=""
             values=""
-            keys_sorted = list(current.keys())
+            total = 0
+            keys_sorted = list(self.current.keys())
             keys_sorted.sort()
             for resource in keys_sorted:
                 goods += resource+":\n"
-                values += str(current[resource])+"\n"
+                values += str(self.current[resource])+"\n"
+                total += self.current[resource]
             self.goods_string.set(goods[:-1])
             self.values_string.set(values[:-1])
+            self.totals_string.set(str(total))
 
 #---------- handle storage of data
 
     def startup_data_retrieval(self):
+        main_thread_not_running = True
+        while main_thread_not_running:
+            try:
+                self.gui_frame.event_generate("<<Dummy-Event>>")
+                main_thread_not_running = False
+            except:
+                time.sleep(0.1)
+        #time.sleep(1)
         if self.do_file_storage:
-            time.sleep(0.1)
             self.read_data()
         if (self.do_ftp_storage and self.ftp_server and
             self.ftp_user and self.ftp_password and self.ftp_filepath):
@@ -666,6 +784,7 @@ class ConstructionHelper():
                     self.gui_frame.after(1, lambda: self.UpdateGoods(entry,System="Unknown System",
                                                                       StationName=pseudoname));
                     self.worker_event.wait() #wait for the main thread to be done with processing
+                    time.sleep(0.1) #give the gui some time to avoid strange effects
         except ftplib.error_perm as excep :
             print('Failed to retrieve file from server: '+repr(excep))
             self.ftp_status = 'Failed to retrieve file from server:\n '+str(excep)

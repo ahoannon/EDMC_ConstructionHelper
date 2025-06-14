@@ -47,4 +47,4 @@ def prefs_changed(cmdr, is_beta):
     PrefsUI.save_preferences()
     ConstHelper.get_config()
     ConstHelper.save_data()
-    ConstHelper.fix_theme()
+    ConstHelper.apply_gui_settings()

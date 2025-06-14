@@ -81,10 +81,17 @@ class CH_Preferences():
         self.create_label_entry(frame_overlay, "Transparency (1 invisible - 100 opaque):", "Alpha", 0, 6)
         # general stuff
         ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=1, columnspan=4, padx=2, pady=(5,5), sticky=tk.EW)
+        frame_general = nb.Frame(frame)
+        frame_general.grid(row=2, column=0, sticky=tk.W, padx=4)
+        self.ShowTotal_var = tk.IntVar()
+        self.show_total__button = nb.Checkbutton(frame_general, text="Show total amount to be delivered in the main window",
+                                                  variable=self.ShowTotal_var)
+        self.show_total__button.grid(row=0, column=0, sticky=tk.W, padx=4)
+        self.ShowTotal_var.set(config.get_bool(self.Prefix+"ShowTotal"))
         self.ShowEcon_var = tk.IntVar()
-        self.show_economy__button = nb.Checkbutton(frame, text="Show economy composition of last station you docked to",
+        self.show_economy__button = nb.Checkbutton(frame_general, text="Show economy composition of last station you docked to",
                                                   variable=self.ShowEcon_var)
-        self.show_economy__button.grid(row=2, column=0, sticky=tk.W, padx=4)
+        self.show_economy__button.grid(row=1, column=0, sticky=tk.W, padx=4)
         self.ShowEcon_var.set(config.get_bool(self.Prefix+"ShowEconomy"))
         # Start of file storage stuff
         ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=3, columnspan=4, padx=2, pady=(5,5), sticky=tk.EW)
@@ -129,6 +136,7 @@ class CH_Preferences():
         config.set(self.Prefix+"overlayFG", self.overlayFG_entry.get())
         config.set(self.Prefix+"overlayBG", self.overlayBG_entry.get())
         config.set(self.Prefix+"Alpha", str(int(self.Alpha_entry.get())))
+        config.set(self.Prefix+"ShowTotal", bool(self.ShowTotal_var.get()))
         config.set(self.Prefix+"ShowEconomy", bool(self.ShowEcon_var.get()))
         config.set(self.Prefix+"DoFile", bool(self.DoFile_var.get()))
         config.set(self.Prefix+"storage_file", self.storage_file_entry.get())
