@@ -63,6 +63,12 @@ class CH_Preferences():
             self.FTPPasswd_label.config(state='disabled')
             self.FTPFilePath_entry.config(state='disabled')
             self.FTPFilePath_label.config(state='disabled')
+            
+    def toggle_password(self, event=None):
+        if self.Password_var.get():
+            self.FTPPasswd_entry.configure(show='')
+        else:
+            self.FTPPasswd_entry.configure(show='*')
         
     def prefs_ui(self, parent: nb.Notebook):
         frame = nb.Frame(parent)
@@ -119,13 +125,18 @@ class CH_Preferences():
         self.create_label_entry(frame_ftp, "FTP server:", "FTPServer", 0, 2)
         self.FTPServer_entry.config(width=40)
         self.FTPServer_entry.grid(columnspan=3)
-        self.create_label_entry(frame_ftp, "username:", "FTPUser", 0, 3)
-        self.create_label_entry(frame_ftp, "password:", "FTPPasswd", 1, 3)
+        self.create_label_entry(frame_ftp, "Username:", "FTPUser", 0, 3)
+        self.create_label_entry(frame_ftp, "Password:", "FTPPasswd", 1, 3)
         self.create_label_entry(frame_ftp, "Path to file on Server:", "FTPFilePath", 0, 4)
+        self.Password_var = tk.IntVar()
+        self.ftp_passwd_button = nb.Checkbutton(frame_ftp, text="Show Password", variable=self.Password_var,
+                                                command=self.toggle_password)
+        self.ftp_passwd_button.grid(row=3, column=5, sticky=tk.W)
         self.FTPFilePath_entry.grid(columnspan=3)
         self.DoFTP_var.set(config.get_bool(self.Prefix+"DoFTP"))
+        self.Password_var.set(False)
         self.toggle_ftp_entry()
-        
+        self.toggle_password()
         return frame
 
 
