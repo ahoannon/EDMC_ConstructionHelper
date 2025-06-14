@@ -82,6 +82,8 @@ class ConstructionHelper():
         self.ftp_filepath = ""
         # minimum time between ftp uploads
         self.ftp_upload_delay = 120
+        # how many times (seconds) to (re)try sending if the worker thread is busy
+        self.ftp_upload_retries = 10
         # minimum time between ftp downloads
         self.ftp_download_delay = 60
         # don't send data entries for non-tracked sites that are older than this (in seconds)
@@ -680,7 +682,7 @@ class ConstructionHelper():
         
     def save_data(self):
         if (self.worker_thread and self.worker_thread.is_alive()):
-            #print("Worker Thread still busy.")
+            #print("save_data: Worker Thread still busy.")
             return
         if self.worker_thread:
             self.worker_thread.join();
@@ -741,10 +743,17 @@ class ConstructionHelper():
         self.last_ftp_upload = datetime.now()
         self.gui_frame.after(10, self.update_ftp_status)
 
-    def ftp_store(self):
+    def ftp_store(self, num_retries = 0):
         if (self.worker_thread and self.worker_thread.is_alive()):
-            #print("Worker Thread still busy.")
-            return
+            if num_retries > self.ftp_upload_retries:
+                print("ftp_store: Worker Thread still busy after",num_retries,"retries, aborting.")
+                return
+            else:
+                #print("ftp_store: Worker Thread busy, now at",num_retries,"retries.")
+                self.gui_frame.after(1000, lambda: self.ftp_store(num_retries+1))
+                return
+        #else:
+        #    print("ftp_store: Worker Thread not busy after",num_retries,"retries.")
         if self.worker_thread:
             self.worker_thread.join();
         if (self.do_ftp_storage and self.ftp_server and
