@@ -74,10 +74,7 @@ Greetings, CMDR Hans Wijn
 ## ToDo 
 
 - find and fix bugs
-- remove construction sites finished by someone else
 - display current ship cargo
 - sort goods by category
-- double click action: remove / rename
+- handle localized goods names
 - option to use the [EDMC Overlay](https://github.com/inorton/EDMCOverlay) plugin instead of the TK window
-- remember construction sites between **EDMC** sessions
-- allow user to change site names
