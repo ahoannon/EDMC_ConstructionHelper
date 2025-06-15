@@ -77,4 +77,5 @@ Greetings, CMDR Hans Wijn
 - display current ship cargo
 - sort goods by category
 - handle localized goods names
-- option to use the [EDMC Overlay](https://github.com/inorton/EDMCOverlay) plugin instead of the TK window
+- option to use the [EDMC Overlay](https://github.com/inorton/EDMCOverlay) plugin instead of the TK window(?)
+- can I add expiry time for primary ports?
