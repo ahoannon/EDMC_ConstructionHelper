@@ -125,33 +125,35 @@ class ConstructionHelper():
     def get_config(self):
         if config:
             try:
-                if config.get_str(self.Prefix+"overlayX"):
+                if config.get_str(self.Prefix+"overlayX") != None:
                     self.config_overlayX = int(config.get_str(self.Prefix+"overlayX"))
-                if config.get_str(self.Prefix+"overlayY"):
+                if config.get_str(self.Prefix+"overlayY") != None:
                     self.config_overlayY = int(config.get_str(self.Prefix+"overlayY"))
-                if config.get_str(self.Prefix+"fontSize"):
+                if config.get_str(self.Prefix+"fontSize") != None:
                     self.config_fontSize = int(config.get_str(self.Prefix+"fontSize"))
-                if config.get_str(self.Prefix+"overlayFG"):
+                if config.get_str(self.Prefix+"overlayFG") != None:
                     self.config_overlayFG = config.get_str(self.Prefix+"overlayFG")
-                if config.get_str(self.Prefix+"overlayFG"):
+                if config.get_str(self.Prefix+"overlayFG") != None:
                     self.config_overlayBG = config.get_str(self.Prefix+"overlayBG")
-                if config.get_str(self.Prefix+"Alpha"):                
+                if config.get_str(self.Prefix+"Alpha") != None:
                     self.config_Alpha = float(config.get_str(self.Prefix+"Alpha"))/100.
-                self.show_total = config.get_bool(self.Prefix+"ShowTotal")
-                self.show_economy = config.get_bool(self.Prefix+"ShowEconomy")
-                # defaults to false anyhow:
-                self.do_file_storage = config.get_bool(self.Prefix+"DoFile")
-                if config.get_str(self.Prefix+"storage_file"):
+                if config.get_bool(self.Prefix+"ShowTotal") != None:
+                    self.show_total = config.get_bool(self.Prefix+"ShowTotal")
+                if config.get_bool(self.Prefix+"ShowEconomy") != None:
+                    self.show_economy = config.get_bool(self.Prefix+"ShowEconomy")
+                if config.get_bool(self.Prefix+"DoFile") != None:
+                    self.do_file_storage = config.get_bool(self.Prefix+"DoFile")
+                if config.get_str(self.Prefix+"storage_file") != None:
                     self.storage_file = config.get_str(self.Prefix+"storage_file")
-                # yet another defaults to false
-                self.do_ftp_storage = config.get_bool(self.Prefix+"DoFTP")
-                if config.get_str(self.Prefix+"FTPServer"):
+                if config.get_bool(self.Prefix+"DoFTP") != None:
+                    self.do_ftp_storage = config.get_bool(self.Prefix+"DoFTP")
+                if config.get_str(self.Prefix+"FTPServer") != None:
                     self.ftp_server = config.get_str(self.Prefix+"FTPServer")
-                if config.get_str(self.Prefix+"FTPUser"):
+                if config.get_str(self.Prefix+"FTPUser") != None:
                     self.ftp_user = config.get_str(self.Prefix+"FTPUser")
-                if config.get_str(self.Prefix+"FTPPasswd"):
+                if config.get_str(self.Prefix+"FTPPasswd") != None:
                     self.ftp_password = config.get_str(self.Prefix+"FTPPasswd")
-                if config.get_str(self.Prefix+"FTPFilePath"):
+                if config.get_str(self.Prefix+"FTPFilePath") != None:
                     self.ftp_filepath = config.get_str(self.Prefix+"FTPFilePath")
             except ValueError:
                 print("ValueError raised")
