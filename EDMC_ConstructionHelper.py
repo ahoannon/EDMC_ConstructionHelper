@@ -4,6 +4,7 @@ EDMC Construction Helper class
 import time, sys
 import threading
 import subprocess
+import datetime as dt
 from datetime import datetime
 import json
 import tkinter as tk
@@ -225,8 +226,8 @@ class ConstructionHelper():
     def UpdateGoods(self,entry,System="Unknown System",StationName="Unknown Station"):
         #print("UpdateGoods called from:",threading.current_thread().name);
         # ignore older events
-        newtime = datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ") 
-        timediff = datetime.now() - newtime
+        newtime = datetime.strptime(entry['timestamp'], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.UTC) 
+        timediff = datetime.now(dt.UTC) - newtime
         if ( (timediff.total_seconds() > self.storage_timeout)  or
              (entry['MarketID'] in self.DepotEventTimestamps and
               newtime <=  self.DepotEventTimestamps[entry['MarketID']] )):
@@ -392,7 +393,31 @@ class ConstructionHelper():
             self.update_values()
             self.save_data()
         pass
-    
+
+    def mark_site_completed(self):
+        indices = self.gui_listbox.curselection()
+        if len(indices) != 1:
+            mbox.showerror("Mark as Completed", "Please select exatly one site\n"
+                           "to be marked as completed!",icon=mbox.ERROR)
+            return
+        removeText = "Mark the following site\n - " + self.listbox_stations[indices[0]]
+        removeText += "\n as completed and remove it from the record?"
+        result = mbox.askokcancel("Mark as Completed", removeText,icon=mbox.WARNING)
+        if result:
+            MarketID = self.listbox_IDs[indices[0]]
+            self.DepotEventTimestamps[MarketID] = datetime.now(dt.UTC)
+            entry = {'event' : 'ColonisationConstructionDepot'}
+            entry['timestamp'] = datetime.now(dt.UTC).strftime('%Y-%m-%dT%H:%M:%SZ')
+            entry['MarketID'] = MarketID
+            entry['ConstructionComplete'] = False
+            entry['ConstructionFailed'] = True
+            self.DepotEvents[MarketID] = entry
+            self.GoodsRequired.pop(MarketID)
+            self.update_listbox()
+            self.update_values()
+            self.save_data()
+        pass
+           
     def clip_system_names(self, ButtonPress=None):
         #if ButtonPress: print("Called via hotkey",ButtonPress)
         clipstring = ""
@@ -657,7 +682,7 @@ class ConstructionHelper():
                      namesdict["StationNames"].append(self.SiteNames[marketID]['Name'])
         outstring = json.dumps(namesdict)+'\n'
         for marketID in self.DepotEvents.keys():
-            timediff = datetime.now() - self.DepotEventTimestamps[marketID]
+            timediff = datetime.now(dt.UTC) - self.DepotEventTimestamps[marketID]
             if ((marketID in self.listbox_IDs) and
                 (timediff.total_seconds() < self.storage_timeout)):
                 outstring += json.dumps(self.DepotEvents[marketID])+'\n'

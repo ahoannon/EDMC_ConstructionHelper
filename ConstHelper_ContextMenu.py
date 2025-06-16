@@ -17,6 +17,7 @@ class ContextMenus:
                                       command=self.remove_site)
         self.listbox_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
                                       command=self.copy_system_to_clipboard)
+        self.listbox_menu.add_command(label="Mark this site as completed", command=self.site_completed)
         self.listbox_menu.add_command(label="Export Goods for Spreadsheet", command=self.export_goods_to_spreadsheet)        
         # Bind right-click event to listbox
         self.listbox.bind("<Button-3>", self.show_listbox_menu)  # Right-click on Windows/Linux
@@ -75,6 +76,9 @@ class ContextMenus:
     def remove_site(self):
         #print("remove_site called")
         self.const_helper.remove_sites()
+
+    def site_completed(self):
+        self.const_helper.mark_site_completed()
 
     def copy_system_to_clipboard(self):
         #print("copy_system_to_clipboard called")
