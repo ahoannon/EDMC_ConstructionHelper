@@ -13,11 +13,11 @@ class ContextMenus:
         self.listbox = listbox
         self.const_helper = construction_helper
         self.listbox_menu = tk.Menu(self.listbox, tearoff=tk.FALSE)
-        self.listbox_menu.add_command(label="Remove Site(s)", accelerator="<double-click>",
+        self.listbox_menu.add_command(label="Remove Site(s) from List", accelerator="<double-click>",
                                       command=self.remove_site)
         self.listbox_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
                                       command=self.copy_system_to_clipboard)
-        self.listbox_menu.add_command(label="Mark this site as completed", command=self.site_completed)
+        self.listbox_menu.add_command(label="Mark this Site as Completed", command=self.site_completed)
         self.listbox_menu.add_command(label="Export Goods for Spreadsheet", command=self.export_goods_to_spreadsheet)        
         # Bind right-click event to listbox
         self.listbox.bind("<Button-3>", self.show_listbox_menu)  # Right-click on Windows/Linux
