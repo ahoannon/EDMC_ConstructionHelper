@@ -13,12 +13,12 @@ class ContextMenus:
         self.listbox = listbox
         self.const_helper = construction_helper
         self.listbox_menu = tk.Menu(self.listbox, tearoff=tk.FALSE)
-        self.listbox_menu.add_command(label="Remove Site(s) from List", accelerator="<double-click>",
+        self.listbox_menu.add_command(label="Remove Selected Site(s) from List", accelerator="<double-click>",
                                       command=self.remove_site)
-        self.listbox_menu.add_command(label="Copy System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
+        self.listbox_menu.add_command(label="Copy Selected System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
                                       command=self.copy_system_to_clipboard)
         self.listbox_menu.add_command(label="Mark this Site as Completed", command=self.site_completed)
-        self.listbox_menu.add_command(label="Export Goods for Spreadsheet", command=self.export_goods_to_spreadsheet)        
+        self.listbox_menu.add_command(label="Copy Goods to Clipboard (as Table)", command=self.export_goods_to_spreadsheet)        
         # Bind right-click event to listbox
         self.listbox.bind("<Button-3>", self.show_listbox_menu)  # Right-click on Windows/Linux
         # make the context menus go away when it looses the mouse focus
@@ -27,7 +27,7 @@ class ContextMenus:
         self.labels_menu = tk.Menu(self.parent, tearoff=tk.FALSE)
         self.labels_menu.add_command(label="Copy Selected System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
                                       command=self.copy_system_to_clipboard)
-        self.labels_menu.add_command(label="Export Goods for Spreadsheet", command=self.export_goods_to_spreadsheet)
+        self.labels_menu.add_command(label="Copy Goods to Clipboard (as Table)", command=self.export_goods_to_spreadsheet)
         
         # Bind right-click event to parent
         self.parent.bind("<Button-3>", self.show_labels_menu)  # Right-click on Windows/Linux
