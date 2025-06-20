@@ -19,18 +19,7 @@ to open or close the overlay window on the bottom.
 Once you docked at one or more active construction sites then the listbox will contain names of all known construction sites and the space between the 
 listbox and the overlay window button will contain a list of all the goods that you need to finish the selected construction site(s).
 
-### Multiple Construction Sites
-
-Once you have docked at a construction site that you haven't visited previously and wasn't know to the plugin then a name for this site (the plugin will try to come 
-up with something short and useful) is added to the listbox and the needed goods will be displayed by selecting that new entry in the listbox.
-
-If you have visited more than one construction site then you can select multiple sites in the listbox. If you do so then the list of needed goods will be 
-the sum of the goods needed for all selected sites.
-
-If you select no site then the list of needed goods will be empty.\
-If you visit a new construction site then the selection will be reset to only this new site as mentioned earlier.
-
-### Overlay Window
+#### Overlay Window
 
 The overlay button will open (or close) an overlay window that contains the same list of needed goods as the main window. It is a simple borderless window that
 tries to stay above all other windows, in particular the **ED** game window. If it will be visible for you will depend on your setup. It does work for me on my 
@@ -48,7 +37,18 @@ small, easy to miss, dark rectangle in the corner of your screen. (And it may be
    alt="Screenshot of the overlay window on a Windows system with working transparency" height="200" />
 </picture>](https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Overlay_Windows.png)
 
-### Customization
+#### Multiple Construction Sites
+
+Once you have docked at a construction site that you haven't visited previously and wasn't know to the plugin then a name for this site (the plugin will try to come 
+up with something short and useful) is added to the listbox and the needed goods will be displayed by selecting that new entry in the listbox.
+
+If you have visited more than one construction site then you can select multiple sites in the listbox. If you do so then the list of needed goods will be 
+the sum of the goods needed for all selected sites.
+
+If you select no site then the list of needed goods will be empty.\
+If you visit a new construction site then the selection will be reset to only this new site as mentioned earlier.
+
+#### Customization
 
 [<picture>
   <img src="https://raw.githubusercontent.com/ahoannon/EDMC_ConstructionHelper/refs/heads/main/doc/Preferences.png" 
@@ -59,11 +59,18 @@ You can set parameters for the overlay window in the preferences. No real range-
 fail in some random way or another. The string for the colors can either be a hex RGB value like the default for the text color, or a color name that TK 
 understands.
 
+#### Data Storage and Data Sharing
+
+In the prefenreces you can configure a local file in which the 
+
 ## Technical Stuff
 
 This plugin is based on the `ColonisationConstructionDepot` logfile event that **FDev** introduced with the "Corsair" update on Tuesday April 8th 2025.
 It identifies construction sites by the fact that it sees such an event from there and then tries to come up with a suitable name for the station with the same 
 MarketID. 
+
+- ftp quirks
+- xclip
 
 ## Licence 
 
