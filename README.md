@@ -44,7 +44,7 @@ small, easy to miss, dark rectangle in the corner of your screen. (And it may be
 
 #### Multiple Construction Sites
 
-Once you have docked at a construction site that you haven't visited previously and wasn't know to the plugin then a name for this site (the plugin will try to come 
+Once you have docked at a construction site that you haven't visited previously and wasn't known to the plugin then a name for this site (the plugin will try to come 
 up with something short and useful) is added to the listbox and the needed goods will be displayed by selecting that new entry in the listbox.
 
 If you have visited more than one construction site then you can select multiple sites in the listbox. If you do so then the list of needed goods will be 
@@ -66,12 +66,13 @@ understands.
 
 #### Data Storage and Data Sharing
 
-In the prefenreces you can configure a local file in which the current status of the construction sites is stored and read in at plugin start.
+In the preferences you can configure a local file in which the current status of the construction sites is stored and read in at plugin start.
 
-You can also configure a file on an FTP server to store the current status of the construction sites. This way multiple CMDRs can share the
-status of construction sites by use the same file on the same server. To work properly every CMDR needs read and write access to that remote file.<br>
+You can also configure a file on an FTP server to store the current status of the construction sites. 
+This way, multiple CMDRs can share the status of construction sites by using the same file on the same server
+To work properly every CMDR needs read and write access to that remote file.<br>
 **Note:** This does pose a security risk, both for the server and the user running the plugin. I personally consider the risk small enough that I'm 
-using the fearure, but your mileage may vary.
+using the feature, but your mileage may vary.
 
 #### Copying to Clipboard
 
@@ -90,11 +91,11 @@ The locally stored construction site status is only read in at the start of the 
 a new status.<br>
 The status stored on the FTP server is retrieved at the start of the plugin and whenever you dock at a non-construction-site station. So it won't give you
 a (near-)real-time update on the activities of your friends, but it will give you a current status when I believe you are about to load goods for construction.
-It will only upload the status to the FTP server when you visit a new, previously unknow site or contribute goods to a site yourself.
+It will only upload the status to the FTP server when you visit a new, previously unknown site or contribute goods to a site yourself.
 
-The `tkinter` cpliboard function does not work well together with **ED** on Linux. (The first copy is seen by **ED**, all subsequent copy events seem to 
+The `tkinter` cplipboard function does not work well together with **ED** on Linux. (The first copy is seen by **ED**, all subsequent copy events seem to 
 be ignored.) So if you run this plugin on Linux it will check if a `xclip` executable is in the current `PATH`. If it is found then that is used instead of 
-the `tkinter` cpliboard function, otherwise pasting into the **ED** galaxy map may not work well. <br>
+the `tkinter` cplipboard function, otherwise pasting into the **ED** galaxy map may not work well. <br>
 (Note: **xclip** is also used by the excellent [SpanshRouter](https://github.com/norohind/EDMC_SpanshRouter) plugin, shoutout to that.)
 
 ## Licence 
