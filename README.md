@@ -16,7 +16,7 @@ to open or close the overlay window on the bottom.
 
 ![Screenshot of empty EDMC main window](doc/EDMC_Main.png)
 
-Once you docked at one or more active construction sites then the listbox will contain names of all known construction sites and the space between the 
+Once you've docked at one or more active construction sites then the listbox will contain names of all known construction sites and the space between the 
 listbox and the overlay window button will contain a list of all the goods that you need to finish the selected construction site(s).
 
 There's right-click context menus on the listbox and the goods display that currently allows you to remove site(s) and copy system name(s) or a table 
