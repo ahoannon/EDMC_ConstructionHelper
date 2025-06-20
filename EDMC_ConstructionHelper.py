@@ -1,7 +1,7 @@
 """
 EDMC Construction Helper class
 """
-import time, sys
+import time, sys, shutil
 import threading
 import subprocess
 import datetime as dt
@@ -123,6 +123,14 @@ class ConstructionHelper():
         self.current = {}
         self.get_config()
         self.set_config()
+
+        # -------- system dependent stuff --------
+        if ((sys.platform == "linux" or sys.platform == "linux2") and
+            (shutil.which('xclip') != None)):
+            self.linux_with_xclip = True
+        else:
+            self.linux_with_xclip = False 
+
 
 #---------- handle configuration
     def get_config(self):
@@ -437,14 +445,14 @@ class ConstructionHelper():
                 if clipstring:
                     clipstring += ", "
                 clipstring += sysname
-        #if sys.platform == "linux" or sys.platform == "linux2":
-        #    clipper = subprocess.Popen(["xclip", "-selection", "clipboard"],
-        #                               stdin=subprocess.PIPE)
-        #    clipper.communicate(clipstring.encode('utf-8'))
-        #else:
-        self.parent.clipboard_clear()
-        self.parent.clipboard_append(clipstring)
-        self.parent.update()
+        if self.linux_with_xclip:
+            clipper = subprocess.Popen(["xclip", "-selection", "clipboard"],
+                                       stdin=subprocess.PIPE)
+            clipper.communicate(clipstring.encode('utf-8'))
+        else:
+            self.parent.clipboard_clear()
+            self.parent.clipboard_append(clipstring)
+            self.parent.update()
         self.open_tmpwindow("Copied system(s)",1000)
 
     def clip_resources_spreadsheet(self, ButtonPress=None):
@@ -457,9 +465,14 @@ class ConstructionHelper():
         if not clipstring:
             self.open_tmpwindow("No needed resources.",3000)
         else:
-            self.parent.clipboard_clear()
-            self.parent.clipboard_append(clipstring[:-1])
-            self.parent.update()
+            if self.linux_with_xclip:
+                clipper = subprocess.Popen(["xclip", "-selection", "clipboard"],
+                                           stdin=subprocess.PIPE)
+                clipper.communicate(clipstring.encode('utf-8'))
+            else:
+                self.parent.clipboard_clear()
+                self.parent.clipboard_append(clipstring)
+                self.parent.update()
             self.open_tmpwindow("Copied resources for spreadsheet",1000)
 
             
