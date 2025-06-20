@@ -5,9 +5,9 @@ colonization construction projects.
 
 ## Installation
 
-Download the `.zip` file and unpack it into the `plugins/` directory of **EDMC**, which is shown in the `Plugins` tab of the `Settings` window of **EDMC**
+Download the `.zip` file and unpack it into the `plugins/` directory of **EDMC**, which is shown in the `Plugins` tab of the `Settings` window of **EDMC**.
 
-See also the relevant page on the [EDMC Wiki](https://github.com/EDCD/EDMarketConnector/wiki/Plugins)
+See also the relevant page on the [EDMC Wiki](https://github.com/EDCD/EDMarketConnector/wiki/Plugins).
 
 ## Usage
  
