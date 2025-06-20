@@ -19,6 +19,11 @@ to open or close the overlay window on the bottom.
 Once you docked at one or more active construction sites then the listbox will contain names of all known construction sites and the space between the 
 listbox and the overlay window button will contain a list of all the goods that you need to finish the selected construction site(s).
 
+There's right-click context menus on the listbox and the goods display that currently allows you to remove site(s) and copy system name(s) or a table 
+of the required good to the clipboard.
+
+Via the **EDMC** preferences menu you can configure a couple extra features and et display options. Not all of them are documented here, so have a look at it.
+
 #### Overlay Window
 
 The overlay button will open (or close) an overlay window that contains the same list of needed goods as the main window. It is a simple borderless window that
@@ -61,7 +66,19 @@ understands.
 
 #### Data Storage and Data Sharing
 
-In the prefenreces you can configure a local file in which the 
+In the prefenreces you can configure a local file in which the current status of the construction sites is stored and read in at plugin start.
+
+You can also configure a file on an FTP server to store the current status of the construction sites. This way multiple CMDRs can share the
+status of construction sites by use the same file on the same server. To work properly every CMDR needs read and write access to that remote file.<br>
+**Note:** This does pose a security risk, both for the server and the user running the plugin. I personally consider the risk small enough that I'm 
+using the fearure, but your mileage may vary.
+
+#### Copying to Clipboard
+
+Currently you can copy the star system name(s) of the selected site(s) or the currently displayed list of required goods to the clipboard. When only
+site(s) from one system are selected then the copied system name is suitable for pasting into the **ED** galaxy map. When sites from multiple systems
+are selected then they will be copied as a comma separated list. The required goods are copied with interspersed TAB and newline characters in a format 
+that is suitable for pasting into a spreadsheet.
 
 ## Technical Stuff
 
@@ -69,8 +86,16 @@ This plugin is based on the `ColonisationConstructionDepot` logfile event that *
 It identifies construction sites by the fact that it sees such an event from there and then tries to come up with a suitable name for the station with the same 
 MarketID. 
 
-- ftp quirks
-- xclip
+The locally stored construction site status is only read in at the start of the plugin. It is stored whenever you are docked at a construction site and receive 
+a new status.<br>
+The status stored on the FTP server is retrieved at the start of the plugin and whenever you dock at a non-construction-site station. So it won't give you
+a (near-)real-time update on the activities of your friends, but it will give you a current status when I believe you are about to load goods for construction.
+It will only upload the status to the FTP server when you visit a new, previously unknow site or contribute goods to a site yourself.
+
+The `tkinter` cpliboard function does not work well together with **ED** on Linux. (The first copy is seen by **ED**, all subsequent copy events seem to 
+be ignored.) So if you run this plugin on Linux it will check if a `xclip` executable is in the current `PATH`. If it is found then that is used instead of 
+the `tkinter` cpliboard function, otherwise pasting into the **ED** galaxy map may not work well. <br>
+(Note: **xclip** is also used by the excellent [SpanshRouter](https://github.com/norohind/EDMC_SpanshRouter) plugin, shoutout to that.)
 
 ## Licence 
 
