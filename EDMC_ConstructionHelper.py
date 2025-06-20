@@ -63,6 +63,8 @@ class ConstructionHelper():
         self.show_total = True
         # display the economy composition of a station the user is docked to
         self.show_economy = True
+        # normalize the economy composition before display
+        self.show_economy_normalized = True
         
         # store site data to a local file 
         self.do_file_storage = False
@@ -142,6 +144,8 @@ class ConstructionHelper():
                     self.show_total = config.get_bool(self.Prefix+"ShowTotal")
                 if config.get_bool(self.Prefix+"ShowEconomy") != None:
                     self.show_economy = config.get_bool(self.Prefix+"ShowEconomy")
+                if config.get_bool(self.Prefix+"ShowEconomyNormalized") != None:
+                    self.show_economy_normalized = config.get_bool(self.Prefix+"ShowEconomyNormalized")
                 if config.get_bool(self.Prefix+"DoFile") != None:
                     self.do_file_storage = config.get_bool(self.Prefix+"DoFile")
                 if config.get_str(self.Prefix+"storage_file") != None:
@@ -176,6 +180,7 @@ class ConstructionHelper():
            config.set(self.Prefix+"Alpha", str(int(self.config_Alpha*100)))
            config.set(self.Prefix+"ShowTotal", bool(self.show_total))
            config.set(self.Prefix+"ShowEconomy", bool(self.show_economy))
+           config.set(self.Prefix+"ShowEconomyNormalized", bool(self.show_economy_normalized))
            config.set(self.Prefix+"DoFile", bool(self.do_file_storage))
            config.set(self.Prefix+"storage_file", str(self.storage_file))
            config.set(self.Prefix+"DoFTP", bool(self.do_ftp_storage))
@@ -288,27 +293,27 @@ class ConstructionHelper():
             econ_prop = []
             for econ_dict in entry["StationEconomies"]:
                 if econ_dict["Name"] == "$economy_Agri;":
-                    econ_names.append(" Agr:{0:.1f}%")
+                    econ_names.append(" Agr:")
                 elif econ_dict["Name"] == "$economy_Extraction;":
-                    econ_names.append(" Ext:{0:.1f}%")
+                    econ_names.append(" Ext:")
                 elif econ_dict["Name"] == "$economy_Industrial;":
-                    econ_names.append(" Ind:{0:.1f}%")
+                    econ_names.append(" Ind:")
                 elif econ_dict["Name"] == "$economy_HighTech;":
-                    econ_names.append(" HT:{0:.1f}%")
+                    econ_names.append(" HT:")
                 elif econ_dict["Name"] == "$economy_Military;":
-                    econ_names.append(" Mil:{0:.1f}%")
+                    econ_names.append(" Mil:")
                 elif econ_dict["Name"] == "$economy_Refinery;":
-                    econ_names.append(" Ref:{0:.1f}%")
+                    econ_names.append(" Ref:")
                 elif econ_dict["Name"] == "$economy_Tourism;":
-                    econ_names.append(" Tour:{0:.1f}%")
+                    econ_names.append(" Tour:")
                 elif econ_dict["Name"] == "$economy_Terraforming;":
-                    econ_names.append(" Ter:{0:.1f}%")
+                    econ_names.append(" Ter:")
                 elif econ_dict["Name"] == "$economy_Service;":
-                    econ_names.append(" Serv:{0:.1f}%")
+                    econ_names.append(" Serv:")
                 elif econ_dict["Name"] == "$economy_Carrier;":
-                    econ_names.append(" Carrier:{0:.1f}%")
+                    econ_names.append(" Carrier:")
                 elif econ_dict["Name"] == "$economy_Colony;":
-                    econ_names.append(" Col:{0:.1f}%")
+                    econ_names.append(" Col:")
                 else:
                     econ_names.append("Unk:")
                 econ_prop.append(float(econ_dict["Proportion"]))
@@ -318,7 +323,11 @@ class ConstructionHelper():
                 if ind > 0:
                     economy_string += ','
                 if ind < self.config_max_economies:
-                    economy_string += econ_names[ind].format(econ_prop[ind]/proportion_sum*100.)
+                    economy_string += econ_names[ind]
+                    if self.show_economy_normalized:
+                        economy_string += "{0:.1f}%".format(econ_prop[ind]/proportion_sum*100.)
+                    else:
+                        economy_string += "{0:.0f}%".format(econ_prop[ind]*100.)
                 elif ind == self.config_max_economies:
                     economy_string += ' +'
             self.station_economy.set(economy_string)

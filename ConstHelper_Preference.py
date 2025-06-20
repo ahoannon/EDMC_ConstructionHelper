@@ -34,6 +34,12 @@ class CH_Preferences():
         setattr(self, f"{key}_entry", entry)
         setattr(self, f"{key}_label", label)
 
+    def toggle_econ_button(self):
+        if self.ShowEcon_var.get():
+            self.show_econNorm_button.config(state='normal')
+        else:
+            self.show_econNorm_button.config(state='disabled')
+
     def toggle_file_entry(self):
         if self.DoFile_var.get():
             self.storage_file_entry.config(state='normal')
@@ -97,10 +103,17 @@ class CH_Preferences():
         self.show_total__button.grid(row=0, column=0, sticky=tk.W, padx=4)
         self.ShowTotal_var.set(config.get_bool(self.Prefix+"ShowTotal"))
         self.ShowEcon_var = tk.IntVar()
-        self.show_economy__button = nb.Checkbutton(frame_general, text="Show economy composition of last station you docked to",
-                                                  variable=self.ShowEcon_var)
-        self.show_economy__button.grid(row=1, column=0, sticky=tk.W, padx=4)
+        self.show_economy_button = nb.Checkbutton(frame_general, text="Show economy composition of last station you docked to",
+                                                  variable=self.ShowEcon_var, command=self.toggle_econ_button)
+        self.show_economy_button.grid(row=1, column=0, sticky=tk.W, padx=4)
         self.ShowEcon_var.set(config.get_bool(self.Prefix+"ShowEconomy"))
+        self.ShowEconNormalized_var = tk.IntVar()
+        self.show_econNorm_button = nb.Checkbutton(frame_general,
+                                                   text="Normalize economy composition",
+                                                   variable=self.ShowEconNormalized_var)
+        self.show_econNorm_button.grid(row=1, column=1, sticky=tk.W)
+        self.ShowEconNormalized_var.set(config.get_bool(self.Prefix+"ShowEconomyNormalized"))
+        self.toggle_econ_button()
         # Start of file storage stuff
         ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=3, columnspan=4, padx=2, pady=(5,5), sticky=tk.EW)
         frame_file = nb.Frame(frame)
@@ -151,6 +164,7 @@ class CH_Preferences():
         config.set(self.Prefix+"Alpha", str(int(self.Alpha_entry.get())))
         config.set(self.Prefix+"ShowTotal", bool(self.ShowTotal_var.get()))
         config.set(self.Prefix+"ShowEconomy", bool(self.ShowEcon_var.get()))
+        config.set(self.Prefix+"ShowEconomyNormalized", bool(self.ShowEconNormalized_var.get()))
         config.set(self.Prefix+"DoFile", bool(self.DoFile_var.get()))
         config.set(self.Prefix+"storage_file", self.storage_file_entry.get())
         config.set(self.Prefix+"DoFTP", bool(self.DoFTP_var.get()))
