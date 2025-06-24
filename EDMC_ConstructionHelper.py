@@ -138,8 +138,12 @@ class ConstructionHelper():
             try:
                 if config.get_str(self.Prefix+"overlayX") != None:
                     self.config_overlayX = int(config.get_str(self.Prefix+"overlayX"))
+                if config.get_bool(self.Prefix+"flushRight") != None:
+                    self.flushRight = config.get_bool(self.Prefix+"flushRight")
                 if config.get_str(self.Prefix+"overlayY") != None:
                     self.config_overlayY = int(config.get_str(self.Prefix+"overlayY"))
+                if config.get_bool(self.Prefix+"flushBottom") != None:
+                    self.flushBottom = config.get_bool(self.Prefix+"flushBottom")
                 if config.get_str(self.Prefix+"fontSize") != None:
                     self.config_fontSize = int(config.get_str(self.Prefix+"fontSize"))
                 if config.get_str(self.Prefix+"overlayFG") != None:
@@ -181,7 +185,9 @@ class ConstructionHelper():
     def set_config(self):
         if config:
            config.set(self.Prefix+"overlayX", str(self.config_overlayX))
+           config.set(self.Prefix+"flushRight", False)
            config.set(self.Prefix+"overlayY", str(self.config_overlayY))
+           config.set(self.Prefix+"flushBottom", False)
            config.set(self.Prefix+"fontSize", str(self.config_fontSize))
            config.set(self.Prefix+"overlayFG", str(self.config_overlayFG))
            config.set(self.Prefix+"overlayBG", str(self.config_overlayBG))
@@ -394,18 +400,18 @@ class ConstructionHelper():
         #change buttons on main window
         self.gui_button_open.grid_remove()
         self.gui_button_close.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
-        if ((self.config_overlayX<0) or (self.config_overlayY<0)):
+        if (self.flushRight or self.flushBottom):
             self.gui_overlay.bind('<Configure>', self.position_overlay)
         else:
             self.position_overlay()
         
     def position_overlay(self, event=None):
-        if self.config_overlayX<0:
-            x_pos = 1+self.screen_width - self.gui_overlay.winfo_width() + self.config_overlayX
+        if self.flushRight:
+            x_pos = self.screen_width - self.gui_overlay.winfo_width() + self.config_overlayX
         else:
             x_pos = self.config_overlayX
-        if self.config_overlayY<0:
-            y_pos = 1+self.screen_height - self.gui_overlay.winfo_height() + self.config_overlayY
+        if self.flushBottom:
+            y_pos = self.screen_height - self.gui_overlay.winfo_height() + self.config_overlayY
         else:
             y_pos = self.config_overlayY
         self.gui_overlay.geometry("+%d+%d"%(x_pos,y_pos))
