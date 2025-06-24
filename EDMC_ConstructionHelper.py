@@ -394,7 +394,7 @@ class ConstructionHelper():
         #change buttons on main window
         self.gui_button_open.grid_remove()
         self.gui_button_close.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
-        if ((self.config_overlayX<0) or (self.config_overlayX<0)):
+        if ((self.config_overlayX<0) or (self.config_overlayY<0)):
             self.gui_overlay.bind('<Configure>', self.position_overlay)
         else:
             self.position_overlay()
