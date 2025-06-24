@@ -363,10 +363,14 @@ class ConstructionHelper():
                
 #---------- open and close the overlay window                
     def open_overlay(self):
+        # Get screen dimensions in case we need them
+        self.screen_width = self.gui_frame.winfo_screenwidth()
+        self.screen_height = self.gui_frame.winfo_screenheight()
+        # open the overlay
         self.gui_overlay = tk.Toplevel()
         self.gui_overlay.config(bg="black")
         self.gui_overlay.overrideredirect(True)
-        self.gui_overlay.geometry("+%d+%d"%(self.config_overlayX,self.config_overlayY))
+        #self.gui_overlay.geometry("+%d+%d"%(self.config_overlayX,self.config_overlayY))
         self.gui_overlay.attributes("-topmost", 1)
         self.gui_overlay_goods = tk.Label(self.gui_overlay, textvariable=self.goods_string,
                                           justify=tk.RIGHT,
@@ -390,7 +394,22 @@ class ConstructionHelper():
         #change buttons on main window
         self.gui_button_open.grid_remove()
         self.gui_button_close.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
-
+        if ((self.config_overlayX<0) or (self.config_overlayX<0)):
+            self.gui_overlay.bind('<Configure>', self.position_overlay)
+        else:
+            self.position_overlay()
+        
+    def position_overlay(self, event=None):
+        if self.config_overlayX<0:
+            x_pos = 1+self.screen_width - self.gui_overlay.winfo_width() + self.config_overlayX
+        else:
+            x_pos = self.config_overlayX
+        if self.config_overlayY<0:
+            y_pos = 1+self.screen_height - self.gui_overlay.winfo_height() + self.config_overlayY
+        else:
+            y_pos = self.config_overlayY
+        self.gui_overlay.geometry("+%d+%d"%(x_pos,y_pos))
+        
     def close_overlay(self):
         self.gui_overlay.destroy()
         self.gui_button_open.grid(column=0,row=3,columnspan=3,sticky=(tk.E,tk.W))
