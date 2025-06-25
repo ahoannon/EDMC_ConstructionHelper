@@ -578,6 +578,8 @@ class ConstructionHelper():
         self.context_menus.add_labels_binding(self.gui_values)
         self.context_menus.add_labels_binding(self.gui_total_label)
         self.context_menus.add_labels_binding(self.gui_total_values)
+        self.context_menus.add_labels_binding(self.gui_economies)
+        self.context_menus.add_labels_binding(self.gui_ftp_status)
         self.gui_frame.bind("<Button-1>", self.context_menus.hide_context_menu) 
         self.gui_goods.bind("<Button-1>", self.context_menus.hide_context_menu) 
         self.gui_values.bind("<Button-1>", self.context_menus.hide_context_menu)
