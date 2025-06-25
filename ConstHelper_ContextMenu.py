@@ -28,6 +28,8 @@ class ContextMenus:
         self.labels_menu.add_command(label="Copy Selected System(s) to Clipboard", accelerator= "<Ctrl+Shift+C>",
                                       command=self.copy_system_to_clipboard)
         self.labels_menu.add_command(label="Copy Goods to Clipboard (as Table)", command=self.export_goods_to_spreadsheet)
+        self.labels_menu.add_command(label="Retrieve FTP data now", command=self.retrieve_ftp_data)
+        self.labels_menu.add_command(label="Store data to FTP now", command=self.send_ftp_data)
         
         # Bind right-click event to parent
         self.parent.bind("<Button-3>", self.show_labels_menu)  # Right-click on Windows/Linux
@@ -60,6 +62,12 @@ class ContextMenus:
             self.listbox_menu.unpost()
         #set focus on listbox so that "<FocusOut>" works
         self.listbox.focus_set()
+        if self.const_helper.do_ftp_storage:
+            self.labels_menu.entryconfigure("Retrieve FTP data now", state=tk.NORMAL)
+            self.labels_menu.entryconfigure("Store data to FTP now", state=tk.NORMAL)
+        else:
+            self.labels_menu.entryconfigure("Retrieve FTP data now", state=tk.DISABLED)
+            self.labels_menu.entryconfigure("Store data to FTP now", state=tk.DISABLED)
         # Show labels context menu
         try:
             self.labels_menu.post(event.x_root, event.y_root)
@@ -87,3 +95,13 @@ class ContextMenus:
     def export_goods_to_spreadsheet(self):
         #print("export_goods_to_spreadsheet called")
         self.const_helper.clip_resources_spreadsheet()
+
+    def retrieve_ftp_data(self):
+        #print("export_goods_to_spreadsheet called")
+        self.const_helper.initiate_ftp_get()
+
+    def send_ftp_data(self):
+        #print("export_goods_to_spreadsheet called")
+        self.const_helper.initiate_ftp_send()
+
+        

@@ -348,18 +348,18 @@ class ConstructionHelper():
         return
 
 #---------- handle the ftp store and retrieve events
-    def initiate_ftp_send(self):
+    def initiate_ftp_send(self, entry=None):
         if self.do_ftp_storage:
             tdiff = datetime.now() - self.last_ftp_upload
             if (tdiff.total_seconds() > self.ftp_upload_delay):
                 #give it 100 ms to handle the incomming ConstructionDepot event then save to ftp.
                 self.gui_frame.after(100,self.ftp_store)
 
-    def initiate_ftp_get(self, entry):
+    def initiate_ftp_get(self, entry=None):
         if self.do_ftp_storage:
             tdiff = datetime.now() - self.last_ftp_download
             if (tdiff.total_seconds() > self.ftp_download_delay):
-                if ('StationType' in entry and
+                if (entry and 'StationType' in entry and
                     ((entry['StationType'] == "SpaceConstructionDepot") or
                      (entry['StationType'] == "PlanetaryConstructionDepot") or
                      (entry['StationName'].split(';')[0] == '$EXT_PANEL_ColonisationShip'))):
