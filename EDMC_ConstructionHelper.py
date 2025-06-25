@@ -113,6 +113,8 @@ class ConstructionHelper():
         self.station_economy = tk.StringVar()
         self.ftp_status = ""
         self.ftp_status_var = tk.StringVar()
+        self.ftp_transfer_notice = ""
+        self.ftp_confirm_transfer = False
         self.listbox_IDs = []
         self.listbox_stations = []
         self.last_ftp_upload = datetime(2025, 5, 26)
@@ -624,6 +626,9 @@ class ConstructionHelper():
             self.gui_ftp_status.grid(column=0,row=4,columnspan=3,sticky=(tk.W))
         else:
             self.gui_ftp_status.grid_remove()
+        if self.ftp_confirm_transfer:
+            self.ftp_confirm_transfer = False
+            self.open_tmpwindow(self.ftp_transfer_notice,3000)
             
 #---------- update the display
     def update_listbox(self,clear=False):
@@ -814,6 +819,7 @@ class ConstructionHelper():
             print('Error while storing file: '+repr(excep))
             self.ftp_status = 'Error while storing file:\n '+str(excep)
         #print("file stored on ftp")
+        self.ftp_transfer_notice = "Data Stored to FTP"
         self.last_ftp_upload = datetime.now()
         self.gui_frame.after(10, self.update_ftp_status)
 
@@ -874,8 +880,8 @@ class ConstructionHelper():
         except Exception as excep:
             print('Error while retrieving file: '+repr(excep))
             self.ftp_status = 'Error while retrieving file:\n '+str(excep)
+        self.ftp_transfer_notice = "Data Retrieved from FTP"
         self.last_ftp_download = datetime.now()
-        #print('file retrieved from ftp')
         self.gui_frame.after(10, self.update_ftp_status)
 
     def ftp_get(self):

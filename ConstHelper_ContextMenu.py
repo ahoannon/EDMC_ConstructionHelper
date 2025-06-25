@@ -97,11 +97,11 @@ class ContextMenus:
         self.const_helper.clip_resources_spreadsheet()
 
     def retrieve_ftp_data(self):
-        #print("export_goods_to_spreadsheet called")
+        self.const_helper.ftp_confirm_transfer = True
         self.const_helper.initiate_ftp_get()
 
     def send_ftp_data(self):
-        #print("export_goods_to_spreadsheet called")
+        self.const_helper.ftp_confirm_transfer = True
         self.const_helper.initiate_ftp_send()
 
         
