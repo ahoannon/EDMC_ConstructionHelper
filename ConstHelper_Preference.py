@@ -24,13 +24,14 @@ class CH_Preferences():
         # This all will fail horribly if not set properly!
         self.Prefix = prefix;
         
-    def create_label_entry(self, frame, label_text, key, column, row):
+    def create_label_entry(self, frame, label_text, key, column, row, width=14):
         label = nb.Label(frame, text=label_text)
         label.grid(row=row, column=column*2, sticky=tk.E)
         value = config.get_str(self.Prefix+key)
         entry = nb.EntryMenu(frame)
         entry.insert(0, value)
         entry.grid(row=row, column=(column*2)+1, sticky=tk.EW)
+        entry.config(width=width)
         setattr(self, f"{key}_entry", entry)
         setattr(self, f"{key}_label", label)
 
@@ -93,8 +94,8 @@ class CH_Preferences():
         self.flush_x_left = tk.Radiobutton(frame_overlay,text='Left', variable=self.flush_X, value='0')
         self.flush_x_right = tk.Radiobutton(frame_overlay,text='Right', variable=self.flush_X, value='1')
         self.flush_x_label.grid(row=1, column=2)
-        self.flush_x_left.grid(row=1, column=3)
-        self.flush_x_right.grid(row=1, column=4)
+        self.flush_x_left.grid(row=1, column=3, sticky=tk.W)
+        self.flush_x_right.grid(row=1, column=4, sticky=tk.W)
         self.flush_X.set(config.get_bool(self.Prefix+"flushRight"))
         self.create_label_entry(frame_overlay, "Y-Position (pixels down/up from border):", "overlayY", 0, 2 )
         self.flush_Y = tk.IntVar()
@@ -102,13 +103,16 @@ class CH_Preferences():
         self.flush_y_left = tk.Radiobutton(frame_overlay,text='Top', variable=self.flush_Y, value='0')
         self.flush_y_right = tk.Radiobutton(frame_overlay,text='Bottom', variable=self.flush_Y, value='1')
         self.flush_y_label.grid(row=2, column=2)
-        self.flush_y_left.grid(row=2, column=3)
-        self.flush_y_right.grid(row=2, column=4)
+        self.flush_y_left.grid(row=2, column=3, sticky=tk.W)
+        self.flush_y_right.grid(row=2, column=4, sticky=tk.W)
         self.flush_Y.set(config.get_bool(self.Prefix+"flushBottom"))
-        self.create_label_entry(frame_overlay, "Font Size (character height in pixels, 0=default):", "fontSize", 0, 3 )
+        self.create_label_entry(frame_overlay, "Font Size (height in pixels, 0=default):", "fontSize", 0, 3 )
         self.create_label_entry(frame_overlay, "Text Color (TK color string):", "overlayFG", 0, 4)
-        self.create_label_entry(frame_overlay, "Background Color (TK color string):", "overlayBG", 0, 5)
-        self.create_label_entry(frame_overlay, "Transparency (1 invisible - 100 opaque):", "Alpha", 0, 6)
+        self.create_label_entry(frame_overlay, "Background Color (TK color string):", "overlayBG", 1, 4)
+        self.overlayBG_label.grid(row=4, column=2, columnspan=3, sticky=tk.E)
+        self.overlayBG_entry.grid(row=4, column=5)
+        self.overlayBG_entry.config(width=10)
+        self.create_label_entry(frame_overlay, "Transparency (1 invisible - 100 opaque):", "Alpha", 0, 5)
         # general stuff
         ttk.Separator(frame, orient=tk.HORIZONTAL).grid(row=1, columnspan=4, padx=2, pady=(5,5), sticky=tk.EW)
         frame_general = nb.Frame(frame)
@@ -147,11 +151,11 @@ class CH_Preferences():
         frame_ftp = nb.Frame(frame)
         frame_ftp.grid(row=6, column=0, sticky=tk.W, padx=4)
         self.DoFTP_var = tk.IntVar()
-        self.ftp_storage_button = nb.Checkbutton(frame_ftp, text="Store data on a remote ftp server", variable=self.DoFTP_var,
+        self.ftp_storage_button = nb.Checkbutton(frame_ftp, text="Store data on a remote FTP server", variable=self.DoFTP_var,
                                                   command=self.toggle_ftp_entry)
         self.ftp_storage_button.grid(row=0, column=0, columnspan=2, sticky=tk.W)
         self.FTPlabel = nb.Label(frame_ftp, text="  This is independent of file storage. "
-                                 "May crash if remote ftp-data is corrupted.")
+                                 "May crash if remote FTP-data is corrupted.")
         self.FTPlabel.grid(row=1, column=0, columnspan=4, sticky=tk.W)
         self.create_label_entry(frame_ftp, "FTP server:", "FTPServer", 0, 2)
         self.FTPServer_entry.config(width=40)
